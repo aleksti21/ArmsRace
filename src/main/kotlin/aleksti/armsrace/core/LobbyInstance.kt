@@ -1,6 +1,5 @@
 ﻿package aleksti.armsrace.core
 
-import aleksti.armsrace.core.LobbyManager
 import aleksti.armsrace.core.LobbyManager.getItemFromString
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
@@ -59,7 +58,7 @@ class LobbyInstance(val id: Int, val template: LobbyTemplate) {
     fun checkWarmup() {
         if (template.warmup == true) {
             if (players.size == template.maxPlayers) start(GameState.PLAYING)
-            else if (players.size >= template.minPlayers) {
+            else if (players.size >= template.minPlayers && state != GameState.WAITING) {
                 start(GameState.WAITING)
                 warmupTicks = template.warmupTime * 20
             } else if (players.size < template.minPlayers && state != GameState.LOBBY) {

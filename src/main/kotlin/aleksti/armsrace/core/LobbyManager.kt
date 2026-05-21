@@ -10,7 +10,7 @@ import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
 import net.minecraft.world.item.component.CustomData
 import java.util.UUID
-
+private var nextLobbyId = 1
 object LobbyManager {
     val activeLobbies = mutableMapOf<Int, LobbyInstance>()
     val playerLevels = mutableMapOf<UUID, Int>()
@@ -21,7 +21,7 @@ object LobbyManager {
     private fun neutral(message: String) = "[ArmsRace] $message"
 
     fun createLobby(template_id: String): String {
-        val id = activeLobbies.size + 1
+        val id = nextLobbyId++
         val template = ConfigManager.templates.find { it.templateId == template_id } ?: return error("Arena not found!")
         activeLobbies[id] = LobbyInstance(id, template)
         return success("Lobby created successfully: $template_id - $id")
@@ -142,8 +142,6 @@ object LobbyManager {
 
             // --- МАГИЯ 1.21.1 ---
             // Засовываем наш NBT-тег внутрь компонента minecraft:custom_data
-            val customData = CustomData.of(tag)
-            stack.set(DataComponents.CUSTOM_DATA, customData)
 
             tacz.scope?.let { tag.put("AttachmentSCOPE", createAttachmentTag(it)) }
             tacz.muzzle?.let { tag.put("AttachmentMUZZLE", createAttachmentTag(it)) }
@@ -151,6 +149,9 @@ object LobbyManager {
             tacz.grip?.let { tag.put("AttachmentGRIP", createAttachmentTag(it)) }
             tacz.stock?.let { tag.put("AttachmentSTOCK", createAttachmentTag(it)) }
             tacz.extendedMag?.let { tag.put("AttachmentEXTENDED_MAG", createAttachmentTag(it)) }
+
+            val customData = CustomData.of(tag)
+            stack.set(DataComponents.CUSTOM_DATA, customData)
         }
 
         return stack
@@ -165,27 +166,25 @@ object LobbyManager {
         itemConfig.ammoData?.let { ammo ->
             val tag = CompoundTag()
 
-            // СЛУЧАЙ 1: Творческий бокс с любыми патронами (ammoId не указан)
-            if (ammo.ammoId == null) {
-                tag.putByte("AllTypeCreative", 1)
+            // СЛУЧАЙ 1: Бесконечный ящик для ВСЕХ патронов (isCreative = true, ammoId = нет)
+            if (ammo.isCreative && ammo.ammoId.isNullOrEmpty()) {
+                tag.putBoolean("AllTypeCreative", true)
             }
-            // СЛУЧАИ 2, 3 и 4: Боксы под конкретный патрон (ammoId указан)
-            else {
-                // Обязательные параметры для конкретного патрона
+            // ОСТАЛЬНЫЕ СЛУЧАИ (ammoId точно указан)
+            else if (!ammo.ammoId.isNullOrEmpty()) {
                 tag.putString("AmmoId", ammo.ammoId)
 
-                // Если бокс бесконечный (творческий)
                 if (ammo.isCreative) {
-                    tag.putByte("Creative", 1)
-                }
-                // Если бокс обычный (железный, на N патронов)
-                else {
+                    // СЛУЧАЙ 2: Бесконечный ящик под КОНКРЕТНЫЙ патрон
+                    tag.putBoolean("Creative", true)
+                } else {
+                    // СЛУЧАЙ 3: Обычный железный ящик
                     tag.putInt("AmmoCount", ammo.ammoCount)
                     tag.putInt("Level", ammo.level)
                 }
             }
 
-            // Запихиваем NBT-тег внутрь компонента minecraft:custom_data
+            // Запаковываем в предмет
             val customData = CustomData.of(tag)
             stack.set(DataComponents.CUSTOM_DATA, customData)
         }

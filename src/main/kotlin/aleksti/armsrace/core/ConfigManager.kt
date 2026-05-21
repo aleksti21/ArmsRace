@@ -48,9 +48,9 @@ object ConfigManager {
                     warmupTime = 60,
                     lobbyCoord = SpawnPoint(137.0, -54.0, 0.0),
                     minPlayers = 2,
-                    additionalItems = listOf(Item(item = "tacz:ammo_box", slot = 8, ammoData = AmmoData())),
+                    additionalItems = listOf(Item(item = "tacz:ammo_box", slot = 8, ammoData = AmmoData(isCreative = true))),
                     weapons = listOf(Weapon(item = "tacz:modern_kinetic_gun", taczData = TaczData(gunId="tacz:scar_h", ammo = 20, fireMode = "SEMI", laser = "tacz:laser_compact")),
-                        Weapon(item = "tacz:modern_kinetic_gun", taczData = TaczData(gunId="tacz:akm", ammo = 20, fireMode = "AUTO")),
+                        Weapon(item = "tacz:modern_kinetic_gun", taczData = TaczData(gunId="tacz:ak47", ammo = 20, fireMode = "AUTO")),
                         Weapon(item = "tacz:modern_kinetic_gun", taczData = TaczData(gunId="tacz:deagle", ammo = 10)))
                 )
                 val defaultList = listOf(defaultTemplate, taczTemplate)
