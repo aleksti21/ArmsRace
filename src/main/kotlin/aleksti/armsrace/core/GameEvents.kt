@@ -36,6 +36,7 @@ object GameEvents {
             if (lobby.state == GameState.PLAYING) {
                 for (player in lobby.players.keys) {
                     ScoreboardManager.removeScoreboard(player)
+                    player.health = player.maxHealth
                     player.connection.send(ClientboundSetTitlesAnimationPacket(10, 60, 20))
                     player.connection.send(ClientboundSetTitleTextPacket(Component.literal("§6§lИГРА ОКОНЧЕНА")))
                     player.connection.send(ClientboundSetSubtitleTextPacket(Component.literal("§fПобедил: §a${source.displayName?.string ?: source.name.string}")))

@@ -41,7 +41,19 @@ object ConfigManager {
                     lobbyCoord = SpawnPoint(137.0, -54.0, 0.0),
                     minPlayers = 2
                 )
-                val defaultList = listOf(defaultTemplate)
+                val taczTemplate = LobbyTemplate(
+                    templateId = "tacz",
+                    teams = listOf(TeamTemplate("1", "§b",listOf(SpawnPoint(143.0, -57.0, 28.0))), TeamTemplate("2", "§a",listOf(SpawnPoint(80.0, -60.0, 8.0)))),
+                    maxPlayers = 10,
+                    warmupTime = 60,
+                    lobbyCoord = SpawnPoint(137.0, -54.0, 0.0),
+                    minPlayers = 2,
+                    additionalItems = listOf(Item(item = "tacz:ammo_box", slot = 8, ammoData = AmmoData())),
+                    weapons = listOf(Weapon(item = "tacz:modern_kinetic_gun", taczData = TaczData(gunId="tacz:scar_h", ammo = 20, fireMode = "SEMI", laser = "tacz:laser_compact")),
+                        Weapon(item = "tacz:modern_kinetic_gun", taczData = TaczData(gunId="tacz:akm", ammo = 20, fireMode = "AUTO")),
+                        Weapon(item = "tacz:modern_kinetic_gun", taczData = TaczData(gunId="tacz:deagle", ammo = 10)))
+                )
+                val defaultList = listOf(defaultTemplate, taczTemplate)
 
                 // МАГИЯ 1: Превращаем наши объекты Котлина в текст формата JSON
                 val jsonText = jsonFormat.encodeToString(defaultList)

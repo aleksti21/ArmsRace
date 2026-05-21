@@ -49,7 +49,7 @@ class LobbyInstance(val id: Int, val template: LobbyTemplate) {
         // 3. Берем случайный спавн и телепортируем
         if (teamData.spawns.isNotEmpty()) {
             val spawn = teamData.spawns.random()
-            player.health = 20f
+            player.health = player.maxHealth
             if (template.instantRespawn == false) given(LobbyManager.playerLevels[player.uuid] ?: 0, player)
             player.teleportTo(spawn.x, spawn.y, spawn.z)
             player.addEffect(MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 60, 255, false, false))
@@ -123,6 +123,7 @@ class LobbyInstance(val id: Int, val template: LobbyTemplate) {
                 }
             }
         }
-        for (i in template.weapons[level].additionalItems) player.inventory.setItem(i.slot, ItemStack(getItemFromString(i.item), i.count))
+        for (i in template.weapons[level].additionalItems) if (i.ammoData == null) player.inventory.setItem(i.slot, ItemStack(getItemFromString(i.item), i.count)) else player.inventory.setItem(i.slot,
+            LobbyManager.AmmoBox(i))
     }
 }

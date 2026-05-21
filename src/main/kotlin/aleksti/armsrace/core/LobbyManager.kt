@@ -101,6 +101,21 @@ object LobbyManager {
         return BuiltInRegistries.ITEM.getOptional(location).orElse(Items.AIR)
     }
 
+    private fun createAttachmentTag(attachmentId: String): CompoundTag {
+        val tag = CompoundTag()
+        tag.putString("id", "tacz:attachment")
+        tag.putInt("count", 1)
+
+        val customData = CompoundTag()
+        customData.putString("AttachmentId", attachmentId)
+
+        val components = CompoundTag()
+        components.put("minecraft:custom_data", customData)
+
+        tag.put("components", components)
+        return tag
+    }
+
     fun taczItem(weaponConfig: Weapon): ItemStack {
         // 1. Создаем базовый предмет (твоя старая функция getItemFromString)
         val item = getItemFromString(weaponConfig.item)
@@ -130,24 +145,49 @@ object LobbyManager {
             val customData = CustomData.of(tag)
             stack.set(DataComponents.CUSTOM_DATA, customData)
 
-            if (tacz.scope != null) {
-                // Создаем NBT-структуру вложенного предмета "tacz:attachment"
-                val scopeTag = CompoundTag()
-                scopeTag.putString("id", "tacz:attachment")
-                scopeTag.putInt("count", 1)
+            tacz.scope?.let { tag.put("AttachmentSCOPE", createAttachmentTag(it)) }
+            tacz.muzzle?.let { tag.put("AttachmentMUZZLE", createAttachmentTag(it)) }
+            tacz.laser?.let { tag.put("AttachmentLASER", createAttachmentTag(it)) }
+            tacz.grip?.let { tag.put("AttachmentGRIP", createAttachmentTag(it)) }
+            tacz.stock?.let { tag.put("AttachmentSTOCK", createAttachmentTag(it)) }
+            tacz.extendedMag?.let { tag.put("AttachmentEXTENDED_MAG", createAttachmentTag(it)) }
+        }
 
-                // Внутри прицела есть СВОЙ custom_data с ID прицела
-                val scopeCustomData = CompoundTag()
-                scopeCustomData.putString("AttachmentId", tacz.scope)
+        return stack
+    }
 
-                // Собираем матрешку
-                val scopeComponents = CompoundTag()
-                scopeComponents.put("minecraft:custom_data", scopeCustomData)
-                scopeTag.put("components", scopeComponents)
+    fun AmmoBox(itemConfig: aleksti.armsrace.core.Item): ItemStack {
+        // 1. Создаем базовый предмет
+        val item = getItemFromString(itemConfig.item)
+        val stack = ItemStack(item, itemConfig.count)
 
-                // Кладем прицел в слот прицела самой пушки
-                tag.put("AttachmentSCOPE", scopeTag)
+        // 2. Если это ящик с патронами (есть ammoData)
+        itemConfig.ammoData?.let { ammo ->
+            val tag = CompoundTag()
+
+            // СЛУЧАЙ 1: Творческий бокс с любыми патронами (ammoId не указан)
+            if (ammo.ammoId == null) {
+                tag.putByte("AllTypeCreative", 1)
             }
+            // СЛУЧАИ 2, 3 и 4: Боксы под конкретный патрон (ammoId указан)
+            else {
+                // Обязательные параметры для конкретного патрона
+                tag.putString("AmmoId", ammo.ammoId)
+
+                // Если бокс бесконечный (творческий)
+                if (ammo.isCreative) {
+                    tag.putByte("Creative", 1)
+                }
+                // Если бокс обычный (железный, на N патронов)
+                else {
+                    tag.putInt("AmmoCount", ammo.ammoCount)
+                    tag.putInt("Level", ammo.level)
+                }
+            }
+
+            // Запихиваем NBT-тег внутрь компонента minecraft:custom_data
+            val customData = CustomData.of(tag)
+            stack.set(DataComponents.CUSTOM_DATA, customData)
         }
 
         return stack
