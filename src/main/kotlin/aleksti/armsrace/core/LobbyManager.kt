@@ -1,11 +1,14 @@
 ﻿package aleksti.armsrace.core
 
+import net.minecraft.core.component.DataComponents
 import net.minecraft.core.registries.BuiltInRegistries
+import net.minecraft.nbt.CompoundTag
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
+import net.minecraft.world.item.component.CustomData
 import java.util.UUID
 
 object LobbyManager {
@@ -95,7 +98,58 @@ object LobbyManager {
 
     fun getItemFromString(id: String?): Item {
         val location = ResourceLocation.parse(id)
-        // Если игра не найдет такой предмет, выдадим деревянный меч, чтобы игра не крашнулась
         return BuiltInRegistries.ITEM.getOptional(location).orElse(Items.AIR)
+    }
+
+    fun taczItem(weaponConfig: Weapon): ItemStack {
+        // 1. Создаем базовый предмет (твоя старая функция getItemFromString)
+        val item = getItemFromString(weaponConfig.item)
+        val stack = ItemStack(item)
+
+        // 2. Проверяем, есть ли настройки TaC:Z
+        weaponConfig.taczData?.let { tacz ->
+            // Создаем "коробку" для кастомных NBT данных
+            val tag = CompoundTag()
+
+            // Обязательный параметр: ID самой пушки (скин/модель)
+            tag.putString("GunId", tacz.gunId)
+
+            // Добавляем пулю в патронник, чтобы пушка сразу стреляла (как на твоем скрине)
+            tag.putByte("HasBulletInBarrel", 1)
+
+            // Опциональные параметры (если админ указал их в конфиге)
+            if (tacz.ammo != null) {
+                tag.putInt("GunCurrentAmmoCount", tacz.ammo)
+            }
+            if (tacz.fireMode != null) {
+                tag.putString("GunFireMode", tacz.fireMode)
+            }
+
+            // --- МАГИЯ 1.21.1 ---
+            // Засовываем наш NBT-тег внутрь компонента minecraft:custom_data
+            val customData = CustomData.of(tag)
+            stack.set(DataComponents.CUSTOM_DATA, customData)
+
+            if (tacz.scope != null) {
+                // Создаем NBT-структуру вложенного предмета "tacz:attachment"
+                val scopeTag = CompoundTag()
+                scopeTag.putString("id", "tacz:attachment")
+                scopeTag.putInt("count", 1)
+
+                // Внутри прицела есть СВОЙ custom_data с ID прицела
+                val scopeCustomData = CompoundTag()
+                scopeCustomData.putString("AttachmentId", tacz.scope)
+
+                // Собираем матрешку
+                val scopeComponents = CompoundTag()
+                scopeComponents.put("minecraft:custom_data", scopeCustomData)
+                scopeTag.put("components", scopeComponents)
+
+                // Кладем прицел в слот прицела самой пушки
+                tag.put("AttachmentSCOPE", scopeTag)
+            }
+        }
+
+        return stack
     }
 }

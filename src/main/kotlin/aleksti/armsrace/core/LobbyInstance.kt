@@ -102,7 +102,8 @@ class LobbyInstance(val id: Int, val template: LobbyTemplate) {
     
     fun given(level: Int, player: ServerPlayer) {
         player.inventory.selected = 0
-        player.setItemSlot(EquipmentSlot.MAINHAND, ItemStack(getItemFromString(template.weapons[level].item)))
+        if (template.weapons[level].taczData != null) player.setItemSlot(EquipmentSlot.MAINHAND, LobbyManager.taczItem(template.weapons[level]))
+        else player.setItemSlot(EquipmentSlot.MAINHAND, ItemStack(getItemFromString(template.weapons[level].item)))
         
         val armorData = template.armor.getOrNull(level)
         if (armorData != null) {

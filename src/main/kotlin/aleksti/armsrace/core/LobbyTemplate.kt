@@ -48,7 +48,16 @@ data class Weapon(
     val item: String,
 //    val level: Int,
 //    val enchantments: List<String>,
+    val taczData: TaczData? = null,
     val additionalItems: List<Item> = emptyList(),
+)
+
+@Serializable
+data class TaczData(
+    val gunId: String,
+    val ammo: Int? = null,
+    val fireMode: String? = null,
+    val scope: String? = null,
 )
 
 @Serializable
@@ -61,7 +70,7 @@ data class LobbyTemplate(
     val weapons: List<Weapon>,
     val armor: List<Armor> = emptyList(),
     val additionalItems: List<Item> = emptyList(),
-    val minPlayers: Int = 2,
+    val minPlayers: Int,
     val maxPlayers: Int,
     val warmupTime: Int = 60,
     val warmup: Boolean = true,
