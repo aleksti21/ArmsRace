@@ -1,8 +1,5 @@
 package aleksti.armsrace
 
-import aleksti.armsrace.command.ArmsRaceCommand
-import aleksti.armsrace.core.ConfigManager
-import aleksti.armsrace.core.GameEvents
 import net.neoforged.bus.api.IEventBus
 import net.neoforged.bus.api.SubscribeEvent
 import net.neoforged.fml.common.Mod

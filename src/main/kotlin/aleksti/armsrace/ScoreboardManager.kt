@@ -1,4 +1,4 @@
-package aleksti.armsrace.core
+package aleksti.armsrace
 
 import net.minecraft.network.chat.Component
 import net.minecraft.network.protocol.game.ClientboundSetDisplayObjectivePacket

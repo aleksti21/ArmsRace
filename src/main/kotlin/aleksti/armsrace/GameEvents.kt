@@ -1,4 +1,4 @@
-package aleksti.armsrace.core
+package aleksti.armsrace
 
 import net.minecraft.network.chat.Component
 import net.neoforged.neoforge.event.entity.player.PlayerEvent
@@ -8,6 +8,7 @@ import net.minecraft.network.protocol.game.ClientboundSetTitlesAnimationPacket
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.sounds.SoundEvents
 import net.minecraft.sounds.SoundSource
+import net.minecraft.world.InteractionResult
 import net.minecraft.world.entity.Entity
 import net.neoforged.bus.api.SubscribeEvent
 import net.neoforged.neoforge.event.entity.item.ItemTossEvent
@@ -33,10 +34,12 @@ object GameEvents {
         val index = lobby.template.weapons.getOrNull(newLevel)?.item
         if (index == null) {
             event.isCanceled = true
+            entity.health = entity.maxHealth
             if (lobby.state == GameState.PLAYING) {
                 for (player in lobby.players.keys) {
                     ScoreboardManager.removeScoreboard(player)
                     player.health = player.maxHealth
+                    player.inventory.clearContent()
                     player.connection.send(ClientboundSetTitlesAnimationPacket(10, 60, 20))
                     player.connection.send(ClientboundSetTitleTextPacket(Component.literal("§6§lИГРА ОКОНЧЕНА")))
                     player.connection.send(ClientboundSetSubtitleTextPacket(Component.literal("§fПобедил: §a${source.displayName?.string ?: source.name.string}")))
@@ -101,7 +104,7 @@ object GameEvents {
     fun onBlockPlace(event: PlayerInteractEvent.RightClickBlock) = runIfInGame(event.entity) { player, lobby ->
         if (lobby.template.allowBlockBreaking == false) {
             event.isCanceled = true
-            event.cancellationResult = net.minecraft.world.InteractionResult.FAIL
+            event.cancellationResult = InteractionResult.FAIL
             // Принудительно обновляем инвентарь клиента, чтобы "исчезнувший" блок вернулся
             player.inventoryMenu.sendAllDataToRemote()
         }

@@ -1,15 +1,13 @@
-﻿package aleksti.armsrace.command
+package aleksti.armsrace
 
-import aleksti.armsrace.core.LobbyManager
-import aleksti.armsrace.core.ScoreboardManager
 import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.arguments.IntegerArgumentType
 import com.mojang.brigadier.arguments.StringArgumentType
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.Commands
 import net.minecraft.commands.SharedSuggestionProvider
-import net.minecraft.network.chat.Component
 import net.minecraft.commands.arguments.EntityArgument
+import net.minecraft.network.chat.Component
 
 class ArmsRaceCommand {
     fun register(dispatcher: CommandDispatcher<CommandSourceStack>) {
@@ -20,17 +18,19 @@ class ArmsRaceCommand {
                     ctx.source.sendSuccess({ Component.literal("Используйте: /armsrace create | join | leave | start") }, false)
                     1
                 }
-                .then(Commands.literal("create")
+                .then(
+                    Commands.literal("create")
                     .requires { sourceStack -> sourceStack.hasPermission(2) }
                     .executes { ctx ->
                         ctx.source.sendSuccess({ Component.literal("Введите параметр id") }, false)
                         1
                     }
 
-                    .then(Commands.argument("template_id", StringArgumentType.word())
+                    .then(
+                        Commands.argument("template_id", StringArgumentType.word())
                         .suggests { context, builder ->
                             // Берем список всех загруженных шаблонов и достаем из них template_id
-                            val availableIds = aleksti.armsrace.core.ConfigManager.templates.map { it.templateId }
+                            val availableIds = ConfigManager.templates.map { it.templateId }
                             // Отдаем их Майнкрафту, чтобы он показал их в чате
                             SharedSuggestionProvider.suggest(availableIds, builder)
                         }
@@ -39,56 +39,67 @@ class ArmsRaceCommand {
                             1
                         }
                     ))
-                .then(Commands.literal("join")
+                .then(
+                    Commands.literal("join")
                     .executes { ctx ->
                         ctx.source.sendSuccess({ Component.literal(LobbyManager.addPlayer(ctx.source.playerOrException)) }, false)
                         1
                     }
-                    .then(Commands.argument("lobby_id", IntegerArgumentType.integer(1))
+                    .then(
+                        Commands.argument("lobby_id", IntegerArgumentType.integer(1))
                         .executes {ctx ->
-                            ctx.source.sendSuccess({ Component.literal(LobbyManager.addPlayer(ctx.source.playerOrException,
+                            ctx.source.sendSuccess({ Component.literal(
+                                LobbyManager.addPlayer(ctx.source.playerOrException,
                                 IntegerArgumentType.getInteger(ctx, "lobby_id"))) }, false)
                             1
                         })
                 )
-                .then(Commands.literal("start")
+                .then(
+                    Commands.literal("start")
                     .requires { sourceStack -> sourceStack.hasPermission(2) }
                     .executes { ctx ->
                         ctx.source.sendSuccess({ Component.literal(LobbyManager.startCommand(LobbyManager.findLobbyByPlayer(ctx.source.playerOrException)?.id))}, false)
                         1
                     }
-                    .then(Commands.argument("start_id", IntegerArgumentType.integer(1))
+                    .then(
+                        Commands.argument("start_id", IntegerArgumentType.integer(1))
                         .executes {ctx ->
                             ctx.source.sendSuccess({ Component.literal(LobbyManager.startCommand(IntegerArgumentType.getInteger(ctx, "start_id")))}, false)
                             1
                         })
                 )
-                .then(Commands.literal("leave")
+                .then(
+                    Commands.literal("leave")
                     .executes { ctx ->
                         ctx.source.sendSuccess({ Component.literal(LobbyManager.removePlayer(ctx.source.playerOrException)) }, false)
                         1
                     }
                 )
-                .then(Commands.literal("stop")
+                .then(
+                    Commands.literal("stop")
                     .requires { sourceStack -> sourceStack.hasPermission(2) }
                     .executes { ctx ->
                         ctx.source.sendSuccess({ Component.literal(LobbyManager.deleteLobby(LobbyManager.findLobbyByPlayer(ctx.source.playerOrException)?.id))}, false)
                         1
                     }
-                    .then(Commands.argument("stop_id", IntegerArgumentType.integer(1))
+                    .then(
+                        Commands.argument("stop_id", IntegerArgumentType.integer(1))
                         .executes { ctx ->
                             ctx.source.sendSuccess({ Component.literal(LobbyManager.deleteLobby(IntegerArgumentType.getInteger(ctx, "stop_id")))}, false)
                             1
                         })
                 )
-                .then(Commands.literal("setteam")
+                .then(
+                    Commands.literal("setteam")
                     .requires { sourceStack -> sourceStack.hasPermission(2) } // Только для админов
-                    .then(Commands.argument("target", EntityArgument.player()) // Аргумент 1: ИГРОК
-                        .then(Commands.argument("team_id", com.mojang.brigadier.arguments.StringArgumentType.word()) // Аргумент 2: КОМАНДА
+                    .then(
+                        Commands.argument("target", EntityArgument.player()) // Аргумент 1: ИГРОК
+                        .then(
+                            Commands.argument("team_id", StringArgumentType.word()) // Аргумент 2: КОМАНДА
                             .executes { ctx ->
                                 // Получаем введенные данные
                                 val targetPlayer = EntityArgument.getPlayer(ctx, "target")
-                                val newTeamId = com.mojang.brigadier.arguments.StringArgumentType.getString(ctx, "team_id")
+                                val newTeamId = StringArgumentType.getString(ctx, "team_id")
 
                                 // Ищем лобби этого игрока
                                 val lobby = LobbyManager.findLobbyByPlayer(targetPlayer)
@@ -122,13 +133,14 @@ class ArmsRaceCommand {
                         )
                     )
                 )
-                .then(Commands.literal("reload")
+                .then(
+                    Commands.literal("reload")
                     .requires { sourceStack -> sourceStack.hasPermission(2) } // Только для админов
                     .executes { ctx ->
                         // Вызываем ту самую функцию, которая читает JSON
-                        aleksti.armsrace.core.ConfigManager.loadConfigs()
+                        ConfigManager.loadConfigs()
 
-                        ctx.source.sendSuccess({ net.minecraft.network.chat.Component.literal("§a[ArmsRace] Конфиги успешно перезагружены!") }, true)
+                        ctx.source.sendSuccess({ Component.literal("§a[ArmsRace] Конфиги успешно перезагружены!") }, true)
                         1
                     }
                 )

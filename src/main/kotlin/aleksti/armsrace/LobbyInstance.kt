@@ -1,12 +1,12 @@
-﻿package aleksti.armsrace.core
+﻿package aleksti.armsrace
 
-import aleksti.armsrace.core.LobbyManager.getItemFromString
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.effect.MobEffectInstance
 import net.minecraft.world.effect.MobEffects
 import net.minecraft.world.entity.EquipmentSlot
 import net.minecraft.world.item.ItemStack
+import kotlin.collections.iterator
 
 class LobbyInstance(val id: Int, val template: LobbyTemplate) {
     val players = mutableMapOf<ServerPlayer, String>()
@@ -31,7 +31,7 @@ class LobbyInstance(val id: Int, val template: LobbyTemplate) {
                 player.inventory.clearContent()
                 ScoreboardManager.updateScoreboard(player, this)
                 given(0, player)
-                for (i in template.additionalItems) player.inventory.setItem(i.slot, ItemStack(LobbyManager.getItemFromString(i.item), i.count))
+                for (i in template.additionalItems) player.inventory.setItem(i.slot, getAdditionalItem(i))
             }
         } else return error("Not enough players or the game is already running")
         return success("Game started")
@@ -101,7 +101,7 @@ class LobbyInstance(val id: Int, val template: LobbyTemplate) {
     
     fun given(level: Int, player: ServerPlayer) {
         player.inventory.selected = 0
-        if (template.weapons[level].taczData != null) player.setItemSlot(EquipmentSlot.MAINHAND, LobbyManager.taczItem(template.weapons[level]))
+        if (template.weapons[level].taczData != null) player.setItemSlot(EquipmentSlot.MAINHAND, taczItem(template.weapons[level]))
         else player.setItemSlot(EquipmentSlot.MAINHAND, ItemStack(getItemFromString(template.weapons[level].item)))
         
         val armorData = template.armor.getOrNull(level)
@@ -122,7 +122,10 @@ class LobbyInstance(val id: Int, val template: LobbyTemplate) {
                 }
             }
         }
-        for (i in template.weapons[level].additionalItems) if (i.ammoData == null) player.inventory.setItem(i.slot, ItemStack(getItemFromString(i.item), i.count)) else player.inventory.setItem(i.slot,
-            LobbyManager.AmmoBox(i))
+        for (i in template.weapons[level].additionalItems) player.inventory.setItem(i.slot, getAdditionalItem(i))
+    }
+
+    fun getAdditionalItem(itemConfig: Item): ItemStack {
+        return if (itemConfig.ammoData != null) AmmoBox(itemConfig) else ItemStack(getItemFromString(itemConfig.item),itemConfig.count)
     }
 }

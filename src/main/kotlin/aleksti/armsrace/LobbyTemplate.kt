@@ -1,4 +1,4 @@
-package aleksti.armsrace.core
+package aleksti.armsrace
 import kotlinx.serialization.Serializable
 
 enum class GameState {
