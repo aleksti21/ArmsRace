@@ -1,5 +1,4 @@
 package aleksti.armsrace
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 enum class GameState {
@@ -33,51 +32,26 @@ data class Item(
     val ammoData: AmmoData? = null,
 )
 
-// Общий интерфейс для элементов списка брони
 @Serializable
-sealed interface ArmorEntry
-
-@Serializable
-@SerialName("armor")
 data class Armor(
     val helmet: String? = null,
     val chestplate: String? = null,
     val leggings: String? = null,
     val boots: String? = null,
     val shield: String? = null,
-    val level: Int? = null,
+    val level: Int,
     val replacePreviousOnEmpty: Boolean = true,
 //    val enchantments: List<String>,
-) : ArmorEntry
+)
 
 @Serializable
-@SerialName("group")
-data class ArmorGroup(
-    val armors: List<Armor>,
-    val randomArmor: Boolean = true,
-) : ArmorEntry
-
-// Общий интерфейс для элементов списка оружия
-@Serializable
-sealed interface WeaponEntry
-
-@Serializable
-@SerialName("weapon")
 data class Weapon(
     val item: String,
 //    val level: Int,
 //    val enchantments: List<String>,
     val taczData: TaczData? = null,
     val additionalItems: List<Item> = emptyList(),
-) : WeaponEntry
-
-@Serializable
-@SerialName("group")
-data class WeaponGroup(
-    val weapons: List<Weapon>,
-    val additionalItems: List<Item> = emptyList(),
-    val randomWeapons: Boolean = true,
-) : WeaponEntry
+)
 
 @Serializable
 data class TaczData(
@@ -107,9 +81,8 @@ data class LobbyTemplate(
     val teams: List<TeamTemplate>,
     val instantRespawn: Boolean = true,
     val allowBlockBreaking: Boolean = false,
-    val randomWeapons: Boolean = false,
-    val weapons: List<WeaponEntry>,
-    val armor: List<ArmorEntry> = emptyList(),
+    val weapons: List<Weapon>,
+    val armor: List<Armor> = emptyList(),
     val additionalItems: List<Item> = emptyList(),
     val minPlayers: Int,
     val maxPlayers: Int,

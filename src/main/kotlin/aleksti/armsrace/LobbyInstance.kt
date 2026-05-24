@@ -13,10 +13,6 @@ class LobbyInstance(val id: Int, val template: LobbyTemplate) {
     var state = GameState.LOBBY
     var warmupTicks = -1
 
-    lateinit var activeWeapons: List<WeaponEntry>
-    val selectedGroupWeapons = mutableMapOf<Int, Weapon>()
-    val selectedGroupArmors = mutableMapOf<Int, Armor>()
-
     private fun success(message: String) = "§a[ArmsRace] $message"
     private fun error(message: String) = "§c[ArmsRace] $message"
 
@@ -25,20 +21,6 @@ class LobbyInstance(val id: Int, val template: LobbyTemplate) {
             val availableTeams = template.teams.map { it.teamId }
             if (availableTeams.isEmpty()) return error("Error: no teams found in template!")
             state = gameState
-
-            if (!::activeWeapons.isInitialized) {
-                activeWeapons = if (template.randomWeapons) template.weapons.shuffled() else template.weapons
-                activeWeapons.forEachIndexed { index, entry ->
-                    if (entry is WeaponGroup) {
-                        selectedGroupWeapons[index] = if (entry.randomWeapons) entry.weapons.random() else entry.weapons.first()
-                    }
-                }
-                template.armor.forEachIndexed { index, entry ->
-                    if (entry is ArmorGroup) {
-                        selectedGroupArmors[index] = if (entry.randomArmor) entry.armors.random() else entry.armors.first()
-                    }
-                }
-            }
 
             for ((index, player) in players.keys.toList().withIndex()) {
                 val assignedTeamId = availableTeams[index % availableTeams.size]
@@ -119,42 +101,11 @@ class LobbyInstance(val id: Int, val template: LobbyTemplate) {
     
     fun given(level: Int, player: ServerPlayer) {
         player.inventory.selected = 0
-
-        val weaponEntry = activeWeapons.getOrNull(level) ?: return
-        val weaponToGive: Weapon
-        val additionalItems: List<Item>
-
-        when (weaponEntry) {
-            is Weapon -> {
-                weaponToGive = weaponEntry
-                additionalItems = weaponEntry.additionalItems
-            }
-            is WeaponGroup -> {
-                additionalItems = weaponEntry.additionalItems
-                weaponToGive = if (state == GameState.WAITING) {
-                    if (weaponEntry.randomWeapons) weaponEntry.weapons.random() else weaponEntry.weapons.first()
-                } else {
-                    selectedGroupWeapons[level] ?: weaponEntry.weapons.first()
-                }
-            }
-        }
-
-        if (weaponToGive.taczData != null) player.setItemSlot(EquipmentSlot.MAINHAND, taczItem(weaponToGive))
-        else player.setItemSlot(EquipmentSlot.MAINHAND, ItemStack(getItemFromString(weaponToGive.item)))
+        if (template.weapons[level].taczData != null) player.setItemSlot(EquipmentSlot.MAINHAND, taczItem(template.weapons[level]))
+        else player.setItemSlot(EquipmentSlot.MAINHAND, ItemStack(getItemFromString(template.weapons[level].item)))
         
-        val armorEntry = template.armor.getOrNull(level)
-        if (armorEntry != null) {
-            val armorData: Armor = when (armorEntry) {
-                is Armor -> armorEntry
-                is ArmorGroup -> {
-                    if (state == GameState.WAITING) {
-                        if (armorEntry.randomArmor) armorEntry.armors.random() else armorEntry.armors.first()
-                    } else {
-                        selectedGroupArmors[level] ?: armorEntry.armors.first()
-                    }
-                }
-            }
-
+        val armorData = template.armor.getOrNull(level)
+        if (armorData != null) {
             val armorMap = mapOf(
                 EquipmentSlot.HEAD to armorData.helmet,
                 EquipmentSlot.CHEST to armorData.chestplate,
@@ -171,9 +122,7 @@ class LobbyInstance(val id: Int, val template: LobbyTemplate) {
                 }
             }
         }
-
-        for (i in additionalItems) player.inventory.setItem(i.slot, getAdditionalItem(i))
-        for (i in weaponToGive.additionalItems) player.inventory.setItem(i.slot, getAdditionalItem(i))
+        for (i in template.weapons[level].additionalItems) player.inventory.setItem(i.slot, getAdditionalItem(i))
     }
 
     fun getAdditionalItem(itemConfig: Item): ItemStack {

@@ -31,8 +31,8 @@ object GameEvents {
         if (lobby.state == GameState.LOBBY) return
         val newLevel = level + 1
         LobbyManager.playerLevels[source.uuid] = newLevel
-        val nextWeaponEntry = lobby.activeWeapons.getOrNull(newLevel)
-        if (nextWeaponEntry == null) {
+        val index = lobby.template.weapons.getOrNull(newLevel)?.item
+        if (index == null) {
             event.isCanceled = true
             entity.health = entity.maxHealth
             if (lobby.state == GameState.PLAYING) {
@@ -56,7 +56,7 @@ object GameEvents {
 
         } else {
             lobby.given(newLevel, source)
-            source.displayClientMessage(Component.literal("§eОружие: ${newLevel}/${lobby.activeWeapons.size}"), true)
+            source.displayClientMessage(Component.literal("§eОружие: ${newLevel}/${lobby.template.weapons.size}"), true)
             source.playNotifySound(SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 1.0f, 1.0f)
             for (player in lobby.players.keys) ScoreboardManager.updateScoreboard(player, lobby)
             if (lobby2.state == GameState.LOBBY) return
