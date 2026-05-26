@@ -102,7 +102,7 @@ private fun applyEnchantments(stack: ItemStack, player: ServerPlayer, enchantmen
     return stack
 }
 
-fun buildAndEnchantItem(config: aleksti.armsrace.ConfigItem, player: ServerPlayer): ItemStack {
+fun buildAndEnchantItem(config: ConfigItem, player: ServerPlayer): ItemStack {
     // 1. Создаем базовый предмет
     val mcItem = getItemFromString(config.id)
     // У AdditionalItem может быть count, у Weapon его нет. Берем 1 по умолчанию.

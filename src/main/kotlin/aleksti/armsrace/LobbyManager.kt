@@ -1,14 +1,7 @@
 ﻿package aleksti.armsrace
 
-import net.minecraft.core.component.DataComponents
-import net.minecraft.core.registries.BuiltInRegistries
-import net.minecraft.nbt.CompoundTag
-import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.level.ServerPlayer
-import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
-import net.minecraft.world.item.Items
-import net.minecraft.world.item.component.CustomData
 import java.util.UUID
 import kotlin.collections.get
 
@@ -85,7 +78,7 @@ object LobbyManager {
         nametags(player, NametagsFunType.SHOW)
         ScoreboardManager.removeScoreboard(player)
         if (lobby.state != GameState.LOBBY) lobby.checkWarmup()
-        player.teleportTo(spawn.x, spawn.y, spawn.z)
+        player.teleportTo(player.serverLevel(), spawn.x, spawn.y, spawn.z, player.yRot, player.xRot)
         player.health = player.maxHealth
         return neutral("You left the game")
     }

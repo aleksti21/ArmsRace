@@ -61,7 +61,7 @@ class LobbyInstance(val id: Int, val template: LobbyTemplate) {
             val spawn = teamData.spawns.random()
             player.health = player.maxHealth
             if (template.instantRespawn == false) given(LobbyManager.playerLevels[player.uuid] ?: 0, player)
-            player.teleportTo(spawn.x, spawn.y, spawn.z)
+            player.teleportTo(player.serverLevel(), spawn.x, spawn.y, spawn.z, player.yRot, player.xRot)
             player.addEffect(MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 60, 255, false, false))
         }
     }

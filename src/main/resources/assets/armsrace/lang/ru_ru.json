@@ -1,0 +1,6 @@
+{
+  "messages.armsrace.scoreboard_condition": "§fСостояние: §eОжидание",
+  "messages.armsrace.scoreboard_players": "§fИгроков: §a${lobby.players.size}",
+  "messages.armsrace.start_in_seconds": "§fСтарт через: §c${lobby.warmupTicks / 20} сек",
+  "messages.armsrace.arenas": "§fАрена: §eАрена "
+}
