@@ -8,7 +8,7 @@ enum class GameState {
     FINISHED
 }
 
-interface Item {
+interface ConfigItem {
     val id: String
     val enchantments: List<EnchantData>
         get() = emptyList()
@@ -34,20 +34,24 @@ data class AdditionalItem(
     override val enchantments: List<EnchantData> = emptyList(),
     val count: Int = 1,
     val slot: Int,
-    val level: Int? = null,
     val ammoData: AmmoData? = null,
-): Item
+): ConfigItem
 
 @Serializable
 data class Armor(
-    val helmet: Item? = null,
-    val chestplate: Item? = null,
-    val leggings: Item? = null,
-    val boots: Item? = null,
-    val shield: Item? = null,
-    val level: Int,
+    val helmet: ArmorPiece? = null,
+    val chestplate: ArmorPiece? = null,
+    val leggings: ArmorPiece? = null,
+    val boots: ArmorPiece? = null,
+    val shield: ArmorPiece? = null,
     val replacePreviousOnEmpty: Boolean = true,
 )
+
+@Serializable
+data class ArmorPiece(
+    override val id: String,
+    override val enchantments: List<EnchantData> = emptyList(),
+): ConfigItem
 
 @Serializable
 data class ArmorPool(
@@ -60,7 +64,7 @@ data class Weapon(
     override val enchantments: List<EnchantData> = emptyList(),
     val taczData: TaczData? = null,
     val additionalItems: List<AdditionalItem> = emptyList(),
-): Item
+): ConfigItem
 
 @Serializable
 data class WeaponPool(

@@ -2,6 +2,7 @@ package aleksti.armsrace
 
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import net.minecraft.world.item.enchantment.Enchantment
 import net.neoforged.fml.loading.FMLPaths
 import java.io.File
 
@@ -38,40 +39,42 @@ object ConfigManager {
                     weapons = listOf(
                         WeaponPool(
                             listOf(
-                                Weapon("minecraft:wooden_sword"),
-                                Weapon("minecraft:wooden_axe"),
-                                Weapon("minecraft:wooden_pickaxe"),
-                                Weapon("minecraft:wooden_shovel")
+                                Weapon("minecraft:wooden_sword", enchantments = listOf(EnchantData("minecraft:sharpness"))),
+//                                Weapon("minecraft:wooden_axe"),
+//                                Weapon("minecraft:wooden_pickaxe"),
+//                                Weapon("minecraft:wooden_shovel")
                             )
                         ), WeaponPool(
                             listOf(
-                                Weapon("minecraft:stone_sword"),
-                                Weapon("minecraft:stone_axe"),
-                                Weapon("minecraft:stone_pickaxe"),
-                                Weapon("minecraft:stone_shovel")
+                                Weapon("minecraft:stone_sword", enchantments = listOf(EnchantData("minecraft:sharpness"))),
+//                                Weapon("minecraft:stone_axe"),
+//                                Weapon("minecraft:stone_pickaxe"),
+//                                Weapon("minecraft:stone_shovel")
                             )
                         ), WeaponPool(
                             listOf(
-                                Weapon("minecraft:iron_sword"),
-                                Weapon("minecraft:iron_axe"),
-                                Weapon("minecraft:iron_pickaxe"),
-                                Weapon("minecraft:iron_shovel")
+                                Weapon("minecraft:iron_sword", enchantments = listOf(EnchantData("minecraft:sharpness"))),
+//                                Weapon("minecraft:iron_axe"),
+//                                Weapon("minecraft:iron_pickaxe"),
+//                                Weapon("minecraft:iron_shovel")
                             )
                         ), WeaponPool(
                             listOf(
-                                Weapon("minecraft:diamond_sword"),
-                                Weapon("minecraft:diamond_axe"),
-                                Weapon("minecraft:diamond_pickaxe"),
-                                Weapon("minecraft:diamond_shovel")
+                                Weapon("minecraft:diamond_sword", enchantments = listOf(EnchantData("minecraft:sharpness"))),
+//                                Weapon("minecraft:diamond_axe"),
+//                                Weapon("minecraft:diamond_pickaxe"),
+//                                Weapon("minecraft:diamond_shovel")
                             )
                         )
                     ),
-                    additionalItems = listOf(AdditionalItem("minecraft:cobblestone", count = 54, slot = 7)),
+                    additionalItems = listOf(AdditionalItem("minecraft:cobblestone", count = 54, slot = 7, enchantments = listOf(EnchantData("minecraft:sharpness"))),),
                     armor = listOf(
                         ArmorPool(
                             listOf(
-                                Armor(helmet = "minecraft:iron_helmet", level = 0),
-                                Armor(chestplate = "minecraft:iron_chestplate", level = 1)
+                                Armor(
+                                    helmet = ArmorPiece("minecraft:iron_helmet", listOf(EnchantData("minecraft:unbreaking")))),
+                                Armor(
+                                    chestplate = ArmorPiece("minecraft:iron_chestplate", listOf(EnchantData("minecraft:unbreaking"))))
                             )
                         )
                     ),

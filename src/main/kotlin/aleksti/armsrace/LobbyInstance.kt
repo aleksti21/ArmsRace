@@ -124,9 +124,9 @@ class LobbyInstance(val id: Int, val template: LobbyTemplate) {
                 EquipmentSlot.OFFHAND to armorData.shield
             )
             
-            for ((slot, itemString) in armorMap) {
-                if (itemString != null) {
-                    player.setItemSlot(slot, buildAndEnchantItem(itemString, player))
+            for ((slot, armorItem) in armorMap) {
+                if (armorItem != null) {
+                    player.setItemSlot(slot, buildAndEnchantItem(armorItem, player))
                 } else if (armorData.replacePreviousOnEmpty) {
                     player.setItemSlot(slot, ItemStack.EMPTY)
                 }
