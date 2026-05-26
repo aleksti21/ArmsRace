@@ -135,7 +135,7 @@ fun applyEnchantments(stack: ItemStack, player: ServerPlayer, enchantments: List
     } else return stack
 }
 
-fun Nametags(player: ServerPlayer, type: NametagsFunType) {
+fun nametags(player: ServerPlayer, type: NametagsFunType) {
     // 1. Создаем фейковую команду
     val lobby = LobbyManager.findLobbyByPlayer(player) ?: return
     val team = PlayerTeam(Scoreboard(), "hidden_${lobby.id}")
@@ -153,5 +153,4 @@ fun Nametags(player: ServerPlayer, type: NametagsFunType) {
             )
         }
     } else if (type == NametagsFunType.SHOW) player.connection.send(ClientboundSetPlayerTeamPacket.createRemovePacket(team))
-}
 }

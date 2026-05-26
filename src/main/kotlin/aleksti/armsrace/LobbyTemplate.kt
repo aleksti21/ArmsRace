@@ -24,6 +24,12 @@ data class TeamTemplate(
 
 @Serializable
 data class Item(
+    val id: String,
+    val enchantments: List<EnchantData>
+)
+
+@Serializable
+data class AdditionalItem(
     val item: String,
     val count: Int = 1,
     val enchantments: List<EnchantData> = emptyList(),

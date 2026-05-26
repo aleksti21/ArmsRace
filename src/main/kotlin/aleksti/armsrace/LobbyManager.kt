@@ -82,10 +82,11 @@ object LobbyManager {
         }
         lobby.players.remove(player)
         playerLevels.remove(player.uuid)
+        nametags(player, NametagsFunType.SHOW)
         ScoreboardManager.removeScoreboard(player)
         if (lobby.state != GameState.LOBBY) lobby.checkWarmup()
         player.teleportTo(spawn.x, spawn.y, spawn.z)
-        player.health = 20f
+        player.health = player.maxHealth
         return neutral("You left the game")
     }
 

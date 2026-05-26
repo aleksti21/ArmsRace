@@ -34,6 +34,7 @@ class LobbyInstance(val id: Int, val template: LobbyTemplate) {
                     val assignedTeamId = availableTeams[index % availableTeams.size]
                     players[player] = assignedTeamId
                     LobbyManager.inventories[player.uuid] = player.inventory.items.map  {it.copy()}
+                    nametags(player, NametagsFunType.HIDE)
                 }
                 LobbyManager.playerLevels[player.uuid] = 0
                 teleportPlayerToSpawn(player)
