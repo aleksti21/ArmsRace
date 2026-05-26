@@ -12,6 +12,8 @@ class LobbyInstance(val id: Int, val template: LobbyTemplate) {
     val players = mutableMapOf<ServerPlayer, String>()
     var state = GameState.LOBBY
     var warmupTicks = -1
+    val matchWeapons = mutableListOf<Weapon>()
+    val matchArmor = mutableListOf<Armor>()
 
     private fun success(message: String) = "§a[ArmsRace] $message"
     private fun error(message: String) = "§c[ArmsRace] $message"
@@ -21,6 +23,9 @@ class LobbyInstance(val id: Int, val template: LobbyTemplate) {
             val availableTeams = template.teams.map { it.teamId }
             if (availableTeams.isEmpty()) return error("Error: no teams found in template!")
             state = gameState
+
+            for (pool in template.weapons) matchWeapons.add(pool.options.random())
+            for (pool in template.armor) matchArmor.add(pool.options.random())
 
             for ((index, player) in players.keys.toList().withIndex()) {
                 val assignedTeamId = availableTeams[index % availableTeams.size]
@@ -101,10 +106,10 @@ class LobbyInstance(val id: Int, val template: LobbyTemplate) {
     
     fun given(level: Int, player: ServerPlayer) {
         player.inventory.selected = 0
-        if (template.weapons[level].taczData != null) player.setItemSlot(EquipmentSlot.MAINHAND, taczItem(template.weapons[level]))
-        else player.setItemSlot(EquipmentSlot.MAINHAND, ItemStack(getItemFromString(template.weapons[level].item)))
+        if (matchWeapons[level].taczData != null) player.setItemSlot(EquipmentSlot.MAINHAND, taczItem(matchWeapons[level]))
+        else player.setItemSlot(EquipmentSlot.MAINHAND, ItemStack(getItemFromString(matchWeapons[level].item)))
         
-        val armorData = template.armor.getOrNull(level)
+        val armorData = matchArmor.getOrNull(level)
         if (armorData != null) {
             val armorMap = mapOf(
                 EquipmentSlot.HEAD to armorData.helmet,
@@ -122,7 +127,7 @@ class LobbyInstance(val id: Int, val template: LobbyTemplate) {
                 }
             }
         }
-        for (i in template.weapons[level].additionalItems) player.inventory.setItem(i.slot, getAdditionalItem(i))
+        for (i in matchWeapons[level].additionalItems) player.inventory.setItem(i.slot, getAdditionalItem(i))
     }
 
     fun getAdditionalItem(itemConfig: Item): ItemStack {

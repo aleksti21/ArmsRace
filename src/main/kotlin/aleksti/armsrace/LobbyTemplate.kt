@@ -26,7 +26,7 @@ data class TeamTemplate(
 data class Item(
     val item: String,
     val count: Int = 1,
-//    val enchantments: List<String>,
+    val enchantments: List<EnchantData> = emptyList(),
     val slot: Int,
     val level: Int? = null,
     val ammoData: AmmoData? = null,
@@ -41,16 +41,25 @@ data class Armor(
     val shield: String? = null,
     val level: Int,
     val replacePreviousOnEmpty: Boolean = true,
-//    val enchantments: List<String>,
+    val enchantments: List<EnchantData> = emptyList(),
+)
+
+@Serializable
+data class ArmorPool(
+    val options: List<Armor>,
 )
 
 @Serializable
 data class Weapon(
     val item: String,
-//    val level: Int,
-//    val enchantments: List<String>,
+    val enchantments: List<EnchantData> = emptyList(),
     val taczData: TaczData? = null,
     val additionalItems: List<Item> = emptyList(),
+)
+
+@Serializable
+data class WeaponPool(
+    val options: List<Weapon>,
 )
 
 @Serializable
@@ -75,14 +84,20 @@ data class AmmoData(
 )
 
 @Serializable
+data class EnchantData(
+    val id: String,
+    val level: Int = 1,
+)
+
+@Serializable
 data class LobbyTemplate(
     val templateId: String,
     val displayName: String = "§6§lГОНКА ВООРУЖЕНИЙ",
     val teams: List<TeamTemplate>,
     val instantRespawn: Boolean = true,
     val allowBlockBreaking: Boolean = false,
-    val weapons: List<Weapon>,
-    val armor: List<Armor> = emptyList(),
+    val weapons: List<WeaponPool>,
+    val armor: List<ArmorPool> = emptyList(),
     val additionalItems: List<Item> = emptyList(),
     val minPlayers: Int,
     val maxPlayers: Int,

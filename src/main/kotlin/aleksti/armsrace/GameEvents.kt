@@ -31,7 +31,7 @@ object GameEvents {
         if (lobby.state == GameState.LOBBY) return
         val newLevel = level + 1
         LobbyManager.playerLevels[source.uuid] = newLevel
-        val index = lobby.template.weapons.getOrNull(newLevel)?.item
+        val index = lobby.matchWeapons.getOrNull(newLevel)?.item
         if (index == null) {
             event.isCanceled = true
             entity.health = entity.maxHealth
