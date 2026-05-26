@@ -29,18 +29,17 @@ class LobbyInstance(val id: Int, val template: LobbyTemplate) {
                 for (pool in template.armor) matchArmor.add(pool.options.random())
             }
 
+            for (p in players.keys.toList()) LobbyManager.playerLevels[p.uuid] = 0
             for ((index, player) in players.keys.toList().withIndex()) {
                 if (gameState == GameState.WAITING) {
                     val assignedTeamId = availableTeams[index % availableTeams.size]
                     players[player] = assignedTeamId
                     LobbyManager.inventories[player.uuid] = player.inventory.items.map  {it.copy()}
                     nametags(player, NametagsFunType.HIDE)
-                    ScoreboardManager.initScoreboard(player, Component.literal(template.displayName))
                 }
-                LobbyManager.playerLevels[player.uuid] = 0
+                ScoreboardManager.updateScoreboard(player, this)
                 teleportPlayerToSpawn(player)
                 player.inventory.clearContent()
-                ScoreboardManager.updateScoreboard(player, this)
                 given(0, player)
                 for (i in template.additionalItems) player.inventory.setItem(i.slot, buildAndEnchantItem(i, player))
             }

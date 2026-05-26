@@ -41,17 +41,24 @@ object LobbyManager {
     }
 
     fun addPlayer(player: ServerPlayer, id: Int? = null): String {
-        if (findLobbyByPlayer(player) != null) {
-            return error("You are already in a lobby")
-        }
+        if (findLobbyByPlayer(player) != null) return error("You are already in a lobby")
+
         if (id == null) {
             for (lobby in activeLobbies.values) {
                 val totalSpawns = lobby.template.teams.sumOf { it.spawns.size }
                 if (lobby.state != GameState.PLAYING && lobby.players.size < totalSpawns) {
                     lobby.players[player] = ""
                     playerLevels[player.uuid] = 0
-                    lobby.checkWarmup()
+
+                    // 1. Создаем скорборд СРАЗУ
                     ScoreboardManager.initScoreboard(player, Component.literal(lobby.template.displayName))
+
+                    // 2. Потом запускаем проверки вармапа
+                    lobby.checkWarmup()
+
+                    // 3. Обновляем скорборд, чтобы появились строки (а то будет пустой до первого тика)
+                    ScoreboardManager.updateScoreboard(player, lobby)
+
                     return success("You joined lobby ${lobby.id}")
                 }
             }
@@ -60,6 +67,10 @@ object LobbyManager {
             val lobby = activeLobbies[id] ?: return error("Lobby not found")
             lobby.players[player] = ""
             playerLevels[player.uuid] = 0
+
+            // Тут у тебя вообще не было initScoreboard, поэтому при заходе по ID тоже был бы краш!
+            ScoreboardManager.initScoreboard(player, Component.literal(lobby.template.displayName))
+
             lobby.checkWarmup()
             ScoreboardManager.updateScoreboard(player, lobby)
             return success("You joined lobby $id")
