@@ -35,11 +35,11 @@ class LobbyInstance(val id: Int, val template: LobbyTemplate) {
                     players[player] = assignedTeamId
                     LobbyManager.inventories[player.uuid] = player.inventory.items.map  {it.copy()}
                     nametags(player, NametagsFunType.HIDE)
+                    ScoreboardManager.initScoreboard(player, Component.literal(template.displayName))
                 }
                 LobbyManager.playerLevels[player.uuid] = 0
                 teleportPlayerToSpawn(player)
                 player.inventory.clearContent()
-                ScoreboardManager.removeScoreboard(player)
                 ScoreboardManager.updateScoreboard(player, this)
                 given(0, player)
                 for (i in template.additionalItems) player.inventory.setItem(i.slot, buildAndEnchantItem(i, player))

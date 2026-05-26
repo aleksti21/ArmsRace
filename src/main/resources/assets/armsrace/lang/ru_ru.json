@@ -2,5 +2,12 @@
   "messages.armsrace.scoreboard_condition": "§fСостояние: §eОжидание",
   "messages.armsrace.scoreboard_players": "§fИгроков: §a${lobby.players.size}",
   "messages.armsrace.start_in_seconds": "§fСтарт через: §c${lobby.warmupTicks / 20} сек",
-  "messages.armsrace.arenas": "§fАрена: §eАрена "
+  "messages.armsrace.arenas": "§fАрена: §eАрена ",
+  "armsrace.scoreboard.state": "Состояние",
+  "armsrace.scoreboard.waiting": "Ожидание",
+  "armsrace.scoreboard.players": "Игроков",
+  "armsrace.scoreboard.starting_in": "Старт через",
+  "armsrace.scoreboard.seconds": "%s сек",
+  "armsrace.scoreboard.arena": "Арена",
+  "armsrace.scoreboard.kills": "%s киллов"
 }

@@ -1,5 +1,6 @@
 ﻿package aleksti.armsrace
 
+import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.item.ItemStack
 import java.util.UUID
@@ -50,7 +51,7 @@ object LobbyManager {
                     lobby.players[player] = ""
                     playerLevels[player.uuid] = 0
                     lobby.checkWarmup()
-                    ScoreboardManager.updateScoreboard(player, lobby)
+                    ScoreboardManager.initScoreboard(player, Component.literal(lobby.template.displayName))
                     return success("You joined lobby ${lobby.id}")
                 }
             }

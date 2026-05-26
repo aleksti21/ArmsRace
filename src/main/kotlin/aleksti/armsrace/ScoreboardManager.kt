@@ -1,5 +1,6 @@
 package aleksti.armsrace
 
+import net.minecraft.ChatFormatting
 import net.minecraft.network.chat.Component
 import net.minecraft.network.protocol.game.ClientboundSetDisplayObjectivePacket
 import net.minecraft.network.protocol.game.ClientboundSetObjectivePacket
@@ -13,84 +14,98 @@ import java.util.Optional
 import net.minecraft.network.chat.numbers.BlankFormat
 
 object ScoreboardManager {
-    fun updateScoreboard(player: ServerPlayer, lobby: LobbyInstance) {
-        val objectiveName = "armsrace_board"
-        val scoreboard = Scoreboard()
+    private val objectiveName = "armsrace_board"
 
-        val objective = Objective(
-            scoreboard,
+    private fun getDummyObjective(title: Component): Objective {
+        return Objective(
+            Scoreboard(),
             objectiveName,
             ObjectiveCriteria.DUMMY,
-            Component.literal(lobby.template.displayName),
+            title,
             ObjectiveCriteria.RenderType.INTEGER,
             false,
-            BlankFormat.INSTANCE,
+            BlankFormat.INSTANCE
         )
+    }
 
-        // МЫ БОЛЬШЕ НЕ УДАЛЯЕМ ПАНЕЛЬ КАЖДЫЙ РАЗ!
-        // Просто шлём пакет на её создание (клиент сам разберется, если она уже есть)
-        player.connection.send(ClientboundSetObjectivePacket(objective, 0))
+    fun initScoreboard(player: ServerPlayer, title: Component) {
+        val objective = getDummyObjective(title)
+        player.connection.send(ClientboundSetObjectivePacket(objective, 0)) // 0 = Создать
         player.connection.send(ClientboundSetDisplayObjectivePacket(DisplaySlot.SIDEBAR, objective))
+    }
 
-        // Вот новый sendLine:
-        var lineId = 0 // Порядковый номер строки
-        fun sendLine(text: String, score: Int) {
+    fun updateScoreboard(player: ServerPlayer, lobby: LobbyInstance) {
+        var lineId = 0
+        fun sendLine(text: Component, score: Int) {
             val packet = ClientboundSetScorePacket(
-                "line_${lineId++}", // Владелец теперь ВСЕГДА одинаковый для этой строчки! (line_0, line_1...)
+                "line_${lineId++}",
                 objectiveName,
                 score,
-                Optional.of(Component.literal(text)), // А сам текст (Ники, киллы) кладем сюда!
-                Optional.empty(),
+                Optional.of(text),
+                Optional.empty()
             )
             player.connection.send(packet)
         }
-
-        // --- ДАЛЬШЕ ТВОЯ ЛОГИКА ---
         var lineScore = 99
         if (lobby.state == GameState.WAITING) {
-            sendLine("§fСостояние: §eОжидание", lineScore--)
-            sendLine("§fИгроков: §a${lobby.players.size}", lineScore--)
+            sendLine(
+                Component.translatable("armsrace.scoreboard.state")
+                    .append(Component.literal(": "))
+                    .append(Component.translatable("armsrace.scoreboard.waiting").withStyle(ChatFormatting.YELLOW)),
+                lineScore--
+            )
+            sendLine(
+                Component.translatable("armsrace.scoreboard.players")
+                    .append(Component.literal(": "))
+                    .append(Component.literal(lobby.players.size.toString()).withStyle(ChatFormatting.GREEN)),
+                lineScore--
+            )
             if (lobby.warmupTicks > 0) {
-                // Делим тики на 20, чтобы получить секунды
-                sendLine("§fСтарт через: §c${lobby.warmupTicks / 20} сек", lineScore--)
+                sendLine(
+                    Component.translatable("armsrace.scoreboard.starting_in")
+                        .append(Component.literal(": "))
+                        .append(
+                            Component.translatable("armsrace.scoreboard.seconds", lobby.warmupTicks / 20)
+                                .withStyle(ChatFormatting.RED)
+                        ),
+                    lineScore--
+                )
             }
         } else if (lobby.state == GameState.PLAYING) {
-            sendLine("§fАрена: §eАрена 1", lineScore--)
-            sendLine("§7------------------", lineScore--)
+            sendLine(
+                Component.translatable("armsrace.scoreboard.arena")
+                    .append(Component.literal(": "))
+                    .append(Component.literal("Арена 1").withStyle(ChatFormatting.YELLOW)),
+                lineScore--
+            )
+            sendLine(Component.literal("------------------").withStyle(ChatFormatting.GRAY), lineScore--)
 
-            // Сортируем игроков по фрагам (от лидера к отстающим)
             val sortedPlayers = lobby.players.keys.sortedByDescending { LobbyManager.playerLevels[it.uuid] ?: 0 }
 
             for ((index, p) in sortedPlayers.withIndex()) {
                 val playerTeamId = lobby.players[p] ?: ""
+                val team = lobby.template.teams.find { it.teamId == playerTeamId }
+                val teamColor = team?.colorCode?.let { ChatFormatting.getByName(it) } ?: ChatFormatting.WHITE
 
-// 2. Ищем эту команду в шаблоне и берем её цвет
-                val teamColor = lobby.template.teams.find { it.teamId == playerTeamId }?.colorCode ?: "§f"
-
-// 3. Выводим ник покрашенным!
                 val kills = LobbyManager.playerLevels[p.uuid] ?: 0
-                sendLine("$teamColor${p.name.string}§f: §a$kills киллов", lineScore--)
+                val nameComp = Component.literal(p.name.string).withStyle(teamColor)
+                val killsComp =
+                    Component.translatable("armsrace.scoreboard.kills", kills).withStyle(ChatFormatting.GREEN)
+                val finalLine = Component.empty()
+                    .append(nameComp)
+                    .append(Component.literal(": ").withStyle(ChatFormatting.WHITE))
+                    .append(killsComp)
 
-                // Выводим только Топ-5 игроков, чтобы панель не уехала в пол
+                sendLine(finalLine, lineScore--)
+
                 if (index >= 4) break
             }
-            // Пробел в конце строки важен! Если отправить две одинаковые строки "---", игра их склеит.
-            sendLine("§7------------------ ", lineScore)
+            sendLine(Component.literal("------------------ ").withStyle(ChatFormatting.GRAY), lineScore)
         }
     }
 
-    // Функция для удаления панели (когда игра закончилась)
     fun removeScoreboard(player: ServerPlayer) {
-        val scoreboard = Scoreboard()
-        val objective = Objective(
-            scoreboard,
-            "armsrace_board",
-            ObjectiveCriteria.DUMMY,
-            Component.literal(""),
-            ObjectiveCriteria.RenderType.INTEGER,
-            false,
-            null
-        )
-        player.connection.send(ClientboundSetObjectivePacket(objective, 1))
+        val objective = getDummyObjective(Component.empty())
+        player.connection.send(ClientboundSetObjectivePacket(objective, 1)) // 1 = Удалить
     }
 }
