@@ -4,10 +4,22 @@ import net.minecraft.core.component.DataComponents
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.resources.ResourceLocation
+import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
 import net.minecraft.world.item.component.CustomData
+import net.minecraft.core.registries.Registries
+import net.minecraft.network.protocol.game.ClientboundSetPlayerTeamPacket
+import net.minecraft.resources.ResourceKey
+import net.minecraft.world.scores.PlayerTeam
+import net.minecraft.world.scores.Scoreboard
+import net.minecraft.world.scores.Team
+
+enum class NametagsFunType {
+    SHOW,
+    HIDE
+}
 
 fun getItemFromString(id: String?): Item {
     val location = ResourceLocation.parse(id)
@@ -103,4 +115,43 @@ fun AmmoBox(itemConfig: aleksti.armsrace.Item): ItemStack {
     }
 
     return stack
+}
+
+fun applyEnchantments(stack: ItemStack, player: ServerPlayer, enchantments: List<EnchantData>): ItemStack {
+    if (enchantments != emptyList()) {
+        val enchRegistry = player.server.registryAccess().registryOrThrow(Registries.ENCHANTMENT)
+
+        for ((enchId, level) in enchantments.map { it.id to it.level }) {
+            val location = ResourceLocation.parse(enchId)
+            val enchKey = ResourceKey.create(Registries.ENCHANTMENT, location)
+            val holder = enchRegistry.getHolder(enchKey)
+
+            holder.ifPresent { ench ->
+                stack.enchant(ench, level)
+            }
+        }
+
+        return stack
+    } else return stack
+}
+
+fun Nametags(player: ServerPlayer, type: NametagsFunType) {
+    // 1. Создаем фейковую команду
+    val lobby = LobbyManager.findLobbyByPlayer(player) ?: return
+    val team = PlayerTeam(Scoreboard(), "hidden_${lobby.id}")
+
+    if (type == NametagsFunType.HIDE) {
+        team.nameTagVisibility = Team.Visibility.NEVER
+        player.connection.send(ClientboundSetPlayerTeamPacket.createAddOrModifyPacket(team, true))
+        lobby.players.keys.forEach { p ->
+            player.connection.send(
+                ClientboundSetPlayerTeamPacket.createPlayerPacket(
+                    team,
+                    p.scoreboardName,
+                    ClientboundSetPlayerTeamPacket.Action.ADD
+                )
+            )
+        }
+    } else if (type == NametagsFunType.SHOW) player.connection.send(ClientboundSetPlayerTeamPacket.createRemovePacket(team))
+}
 }

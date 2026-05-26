@@ -13,42 +13,40 @@ import java.util.Optional
 import net.minecraft.network.chat.numbers.BlankFormat
 
 object ScoreboardManager {
-
     fun updateScoreboard(player: ServerPlayer, lobby: LobbyInstance) {
         val objectiveName = "armsrace_board"
         val scoreboard = Scoreboard()
 
-        // 1. Создаем "виртуальную" задачу
         val objective = Objective(
             scoreboard,
             objectiveName,
             ObjectiveCriteria.DUMMY,
-            Component.literal(lobby.template.displayName), // Заголовок панели
+            Component.literal(lobby.template.displayName),
             ObjectiveCriteria.RenderType.INTEGER,
             false,
             BlankFormat.INSTANCE,
         )
 
-        // 2. Отправляем пакеты: сначала удаляем старую панель (1), потом создаем новую (0), потом показываем справа
-        player.connection.send(ClientboundSetObjectivePacket(objective, 1))
+        // МЫ БОЛЬШЕ НЕ УДАЛЯЕМ ПАНЕЛЬ КАЖДЫЙ РАЗ!
+        // Просто шлём пакет на её создание (клиент сам разберется, если она уже есть)
         player.connection.send(ClientboundSetObjectivePacket(objective, 0))
         player.connection.send(ClientboundSetDisplayObjectivePacket(DisplaySlot.SIDEBAR, objective))
 
-        // Вспомогательная функция, чтобы не писать длинный пакет 100 раз
+        // Вот новый sendLine:
+        var lineId = 0 // Порядковый номер строки
         fun sendLine(text: String, score: Int) {
             val packet = ClientboundSetScorePacket(
-                text, // Текст строки выступает в роли "Владельца"
+                "line_${lineId++}", // Владелец теперь ВСЕГДА одинаковый для этой строчки! (line_0, line_1...)
                 objectiveName,
-                score, // Чем выше эта цифра, тем выше строка будет на экране
-                Optional.empty(),
+                score,
+                Optional.of(Component.literal(text)), // А сам текст (Ники, киллы) кладем сюда!
                 Optional.empty(),
             )
             player.connection.send(packet)
         }
 
-        // 3. ФОРМИРУЕМ НАШ ИНТЕРФЕЙС
-        var lineScore = 99 // Начинаем сверху вниз
-
+        // --- ДАЛЬШЕ ТВОЯ ЛОГИКА ---
+        var lineScore = 99
         if (lobby.state == GameState.WAITING) {
             sendLine("§fСостояние: §eОжидание", lineScore--)
             sendLine("§fИгроков: §a${lobby.players.size}", lineScore--)
@@ -84,7 +82,15 @@ object ScoreboardManager {
     // Функция для удаления панели (когда игра закончилась)
     fun removeScoreboard(player: ServerPlayer) {
         val scoreboard = Scoreboard()
-        val objective = Objective(scoreboard, "armsrace_board", ObjectiveCriteria.DUMMY, Component.literal(""), ObjectiveCriteria.RenderType.INTEGER, false, null)
+        val objective = Objective(
+            scoreboard,
+            "armsrace_board",
+            ObjectiveCriteria.DUMMY,
+            Component.literal(""),
+            ObjectiveCriteria.RenderType.INTEGER,
+            false,
+            null
+        )
         player.connection.send(ClientboundSetObjectivePacket(objective, 1))
     }
 }

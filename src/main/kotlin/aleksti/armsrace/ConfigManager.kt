@@ -31,18 +31,50 @@ object ConfigManager {
                 // Создаем болванку для примера
                 val defaultTemplate = LobbyTemplate(
                     templateId = "vanilla",
-                    teams = listOf(TeamTemplate("1", "§b",listOf(SpawnPoint(143.0, -57.0, 28.0))), TeamTemplate("2", "§a",listOf(SpawnPoint(80.0, -60.0, 8.0)))),
-                    weapons = listOf(WeaponPool(listOf(
-                        Weapon("minecraft:wooden_sword"), Weapon("minecraft:wooden_axe"), Weapon("minecraft:wooden_pickaxe"), Weapon("minecraft:wooden_shovel")
-                    )), WeaponPool(listOf(
-                        Weapon("minecraft:stone_sword"), Weapon("minecraft:stone_axe"), Weapon("minecraft:stone_pickaxe"), Weapon("minecraft:stone_shovel")
-                    )), WeaponPool(listOf(
-                        Weapon("minecraft:iron_sword"), Weapon("minecraft:iron_axe"), Weapon("minecraft:iron_pickaxe"), Weapon("minecraft:iron_shovel")
-                    )), WeaponPool(listOf(
-                        Weapon("minecraft:diamond_sword"), Weapon("minecraft:diamond_axe"), Weapon("minecraft:diamond_pickaxe"), Weapon("minecraft:diamond_shovel")
-                    ))),
+                    teams = listOf(
+                        TeamTemplate("1", "§b", listOf(SpawnPoint(143.0, -57.0, 28.0))),
+                        TeamTemplate("2", "§a", listOf(SpawnPoint(80.0, -60.0, 8.0)))
+                    ),
+                    weapons = listOf(
+                        WeaponPool(
+                            listOf(
+                                Weapon("minecraft:wooden_sword"),
+                                Weapon("minecraft:wooden_axe"),
+                                Weapon("minecraft:wooden_pickaxe"),
+                                Weapon("minecraft:wooden_shovel")
+                            )
+                        ), WeaponPool(
+                            listOf(
+                                Weapon("minecraft:stone_sword"),
+                                Weapon("minecraft:stone_axe"),
+                                Weapon("minecraft:stone_pickaxe"),
+                                Weapon("minecraft:stone_shovel")
+                            )
+                        ), WeaponPool(
+                            listOf(
+                                Weapon("minecraft:iron_sword"),
+                                Weapon("minecraft:iron_axe"),
+                                Weapon("minecraft:iron_pickaxe"),
+                                Weapon("minecraft:iron_shovel")
+                            )
+                        ), WeaponPool(
+                            listOf(
+                                Weapon("minecraft:diamond_sword"),
+                                Weapon("minecraft:diamond_axe"),
+                                Weapon("minecraft:diamond_pickaxe"),
+                                Weapon("minecraft:diamond_shovel")
+                            )
+                        )
+                    ),
                     additionalItems = listOf(Item("minecraft:cobblestone", 54, slot = 7)),
-                    armor = listOf(ArmorPool(listOf(Armor(helmet = "minecraft:iron_helmet", level = 0), Armor(chestplate = "minecraft:iron_chestplate", level = 1)))),
+                    armor = listOf(
+                        ArmorPool(
+                            listOf(
+                                Armor(helmet = "minecraft:iron_helmet", level = 0),
+                                Armor(chestplate = "minecraft:iron_chestplate", level = 1)
+                            )
+                        )
+                    ),
                     maxPlayers = 10,
                     warmupTime = 60,
                     lobbyCoord = SpawnPoint(137.0, -54.0, 0.0),
