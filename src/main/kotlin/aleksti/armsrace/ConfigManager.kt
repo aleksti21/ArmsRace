@@ -66,7 +66,7 @@ object ConfigManager {
                             )
                         )
                     ),
-                    additionalItems = listOf(Item("minecraft:cobblestone", 54, slot = 7)),
+                    additionalItems = listOf(AdditionalItem("minecraft:cobblestone", count = 54, slot = 7)),
                     armor = listOf(
                         ArmorPool(
                             listOf(

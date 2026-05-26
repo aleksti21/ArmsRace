@@ -8,6 +8,12 @@ enum class GameState {
     FINISHED
 }
 
+interface Item {
+    val id: String
+    val enchantments: List<EnchantData>
+        get() = emptyList()
+}
+
 @Serializable
 data class SpawnPoint(
     val x: Double,
@@ -23,31 +29,24 @@ data class TeamTemplate(
 )
 
 @Serializable
-data class Item(
-    val id: String,
-    val enchantments: List<EnchantData>
-)
-
-@Serializable
 data class AdditionalItem(
-    val item: String,
+    override val id: String,
+    override val enchantments: List<EnchantData> = emptyList(),
     val count: Int = 1,
-    val enchantments: List<EnchantData> = emptyList(),
     val slot: Int,
     val level: Int? = null,
     val ammoData: AmmoData? = null,
-)
+): Item
 
 @Serializable
 data class Armor(
-    val helmet: String? = null,
-    val chestplate: String? = null,
-    val leggings: String? = null,
-    val boots: String? = null,
-    val shield: String? = null,
+    val helmet: Item? = null,
+    val chestplate: Item? = null,
+    val leggings: Item? = null,
+    val boots: Item? = null,
+    val shield: Item? = null,
     val level: Int,
     val replacePreviousOnEmpty: Boolean = true,
-    val enchantments: List<EnchantData> = emptyList(),
 )
 
 @Serializable
@@ -57,11 +56,11 @@ data class ArmorPool(
 
 @Serializable
 data class Weapon(
-    val item: String,
-    val enchantments: List<EnchantData> = emptyList(),
+    override val id: String,
+    override val enchantments: List<EnchantData> = emptyList(),
     val taczData: TaczData? = null,
-    val additionalItems: List<Item> = emptyList(),
-)
+    val additionalItems: List<AdditionalItem> = emptyList(),
+): Item
 
 @Serializable
 data class WeaponPool(
@@ -104,7 +103,7 @@ data class LobbyTemplate(
     val allowBlockBreaking: Boolean = false,
     val weapons: List<WeaponPool>,
     val armor: List<ArmorPool> = emptyList(),
-    val additionalItems: List<Item> = emptyList(),
+    val additionalItems: List<AdditionalItem> = emptyList(),
     val minPlayers: Int,
     val maxPlayers: Int,
     val warmupTime: Int = 60,

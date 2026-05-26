@@ -42,7 +42,7 @@ class LobbyInstance(val id: Int, val template: LobbyTemplate) {
                 ScoreboardManager.removeScoreboard(player)
                 ScoreboardManager.updateScoreboard(player, this)
                 given(0, player)
-                for (i in template.additionalItems) player.inventory.setItem(i.slot, getAdditionalItem(i))
+                for (i in template.additionalItems) player.inventory.setItem(i.slot, buildAndEnchantItem(i, player))
             }
         } else return error("Not enough players or the game is already running")
         return success("Game started")
@@ -112,8 +112,7 @@ class LobbyInstance(val id: Int, val template: LobbyTemplate) {
     
     fun given(level: Int, player: ServerPlayer) {
         player.inventory.selected = 0
-        if (matchWeapons[level].taczData != null) player.setItemSlot(EquipmentSlot.MAINHAND, taczItem(matchWeapons[level]))
-        else player.setItemSlot(EquipmentSlot.MAINHAND, ItemStack(getItemFromString(matchWeapons[level].item)))
+        player.setItemSlot(EquipmentSlot.MAINHAND, buildAndEnchantItem(matchWeapons[level], player))
         
         val armorData = matchArmor.getOrNull(level)
         if (armorData != null) {
@@ -127,16 +126,12 @@ class LobbyInstance(val id: Int, val template: LobbyTemplate) {
             
             for ((slot, itemString) in armorMap) {
                 if (itemString != null) {
-                    player.setItemSlot(slot, ItemStack(getItemFromString(itemString)))
+                    player.setItemSlot(slot, buildAndEnchantItem(itemString, player))
                 } else if (armorData.replacePreviousOnEmpty) {
                     player.setItemSlot(slot, ItemStack.EMPTY)
                 }
             }
         }
-        for (i in matchWeapons[level].additionalItems) player.inventory.setItem(i.slot, getAdditionalItem(i))
-    }
-
-    fun getAdditionalItem(itemConfig: Item): ItemStack {
-        return if (itemConfig.ammoData != null) AmmoBox(itemConfig) else ItemStack(getItemFromString(itemConfig.item),itemConfig.count)
+        for (i in matchWeapons[level].additionalItems) player.inventory.setItem(i.slot, buildAndEnchantItem(i,player))
     }
 }

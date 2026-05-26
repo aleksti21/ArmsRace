@@ -41,98 +41,90 @@ private fun createAttachmentTag(attachmentId: String): CompoundTag {
     return tag
 }
 
-fun taczItem(weaponConfig: Weapon): ItemStack {
-    // 1. Создаем базовый предмет (твоя старая функция getItemFromString)
-    val item = getItemFromString(weaponConfig.item)
-    val stack = ItemStack(item)
+private fun taczItem(stack: ItemStack, taczData: TaczData): ItemStack {
+    val tag = CompoundTag()
+    tag.putString("GunId", taczData.gunId)
+    tag.putByte("HasBulletInBarrel", 1)
 
-    // 2. Проверяем, есть ли настройки TaC:Z
-    weaponConfig.taczData?.let { tacz ->
-        // Создаем "коробку" для кастомных NBT данных
-        val tag = CompoundTag()
+    if (taczData.ammo != null) {
+        tag.putInt("GunCurrentAmmoCount", taczData.ammo)
+    }
+    if (taczData.fireMode != null) {
+        tag.putString("GunFireMode", taczData.fireMode)
+    }
 
-        // Обязательный параметр: ID самой пушки (скин/модель)
-        tag.putString("GunId", tacz.gunId)
+    taczData.scope?.let { tag.put("AttachmentSCOPE", createAttachmentTag(it)) }
+    taczData.muzzle?.let { tag.put("AttachmentMUZZLE", createAttachmentTag(it)) }
+    taczData.laser?.let { tag.put("AttachmentLASER", createAttachmentTag(it)) }
+    taczData.grip?.let { tag.put("AttachmentGRIP", createAttachmentTag(it)) }
+    taczData.stock?.let { tag.put("AttachmentSTOCK", createAttachmentTag(it)) }
+    taczData.extendedMag?.let { tag.put("AttachmentEXTENDED_MAG", createAttachmentTag(it)) }
 
-        // Добавляем пулю в патронник, чтобы пушка сразу стреляла (как на твоем скрине)
-        tag.putByte("HasBulletInBarrel", 1)
+    stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag))
+    return stack
+}
 
-        // Опциональные параметры (если админ указал их в конфиге)
-        if (tacz.ammo != null) {
-            tag.putInt("GunCurrentAmmoCount", tacz.ammo)
+private fun AmmoBox(stack: ItemStack, AmmoData: AmmoData): ItemStack {
+    val tag = CompoundTag()
+    if (AmmoData.isCreative && AmmoData.ammoId.isNullOrEmpty()) {
+        tag.putBoolean("AllTypeCreative", true)
+    }
+    // ОСТАЛЬНЫЕ СЛУЧАИ (ammoId точно указан)
+    else if (!AmmoData.ammoId.isNullOrEmpty()) {
+        tag.putString("AmmoId", AmmoData.ammoId)
+
+        if (AmmoData.isCreative) {
+            // СЛУЧАЙ 2: Бесконечный ящик под КОНКРЕТНЫЙ патрон
+            tag.putBoolean("Creative", true)
+        } else {
+            // СЛУЧАЙ 3: Обычный железный ящик
+            tag.putInt("AmmoCount", AmmoData.ammoCount)
+            tag.putInt("Level", AmmoData.level)
         }
-        if (tacz.fireMode != null) {
-            tag.putString("GunFireMode", tacz.fireMode)
+    }
+    stack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag))
+    return stack
+}
+
+private fun applyEnchantments(stack: ItemStack, player: ServerPlayer, enchantments: List<EnchantData>): ItemStack {
+    val enchRegistry = player.server.registryAccess().registryOrThrow(Registries.ENCHANTMENT)
+
+    for ((enchId, level) in enchantments.map { it.id to it.level }) {
+        val location = ResourceLocation.parse(enchId)
+        val enchKey = ResourceKey.create(Registries.ENCHANTMENT, location)
+        val holder = enchRegistry.getHolder(enchKey)
+
+        holder.ifPresent { ench ->
+            stack.enchant(ench, level)
         }
-
-        // --- МАГИЯ 1.21.1 ---
-        // Засовываем наш NBT-тег внутрь компонента minecraft:custom_data
-
-        tacz.scope?.let { tag.put("AttachmentSCOPE", createAttachmentTag(it)) }
-        tacz.muzzle?.let { tag.put("AttachmentMUZZLE", createAttachmentTag(it)) }
-        tacz.laser?.let { tag.put("AttachmentLASER", createAttachmentTag(it)) }
-        tacz.grip?.let { tag.put("AttachmentGRIP", createAttachmentTag(it)) }
-        tacz.stock?.let { tag.put("AttachmentSTOCK", createAttachmentTag(it)) }
-        tacz.extendedMag?.let { tag.put("AttachmentEXTENDED_MAG", createAttachmentTag(it)) }
-
-        val customData = CustomData.of(tag)
-        stack.set(DataComponents.CUSTOM_DATA, customData)
     }
 
     return stack
 }
 
-fun AmmoBox(itemConfig: aleksti.armsrace.Item): ItemStack {
+fun buildAndEnchantItem(config: aleksti.armsrace.Item, player: ServerPlayer): ItemStack {
     // 1. Создаем базовый предмет
-    val item = getItemFromString(itemConfig.item)
-    val stack = ItemStack(item, itemConfig.count)
+    val mcItem = getItemFromString(config.id)
+    // У AdditionalItem может быть count, у Weapon его нет. Берем 1 по умолчанию.
+    val count = if (config is AdditionalItem) config.count else 1
+    val stack = ItemStack(mcItem, count)
 
-    // 2. Если это ящик с патронами (есть ammoData)
-    itemConfig.ammoData?.let { ammo ->
-        val tag = CompoundTag()
+    // 2. Если это Weapon — накидываем NBT от TaC:Z
+    if (config is Weapon && config.taczData != null) {
+        // Твоя логика из taczItem, но применяем её к уже созданному stack
+        taczItem(stack, config.taczData)
+    }
+    // 3. Если это AdditionalItem с патронами (твой бывший AmmoBox)
+    else if (config is AdditionalItem && config.ammoData != null) {
+        AmmoBox(stack, config.ammoData)
+    }
 
-        // СЛУЧАЙ 1: Бесконечный ящик для ВСЕХ патронов (isCreative = true, ammoId = нет)
-        if (ammo.isCreative && ammo.ammoId.isNullOrEmpty()) {
-            tag.putBoolean("AllTypeCreative", true)
-        }
-        // ОСТАЛЬНЫЕ СЛУЧАИ (ammoId точно указан)
-        else if (!ammo.ammoId.isNullOrEmpty()) {
-            tag.putString("AmmoId", ammo.ammoId)
-
-            if (ammo.isCreative) {
-                // СЛУЧАЙ 2: Бесконечный ящик под КОНКРЕТНЫЙ патрон
-                tag.putBoolean("Creative", true)
-            } else {
-                // СЛУЧАЙ 3: Обычный железный ящик
-                tag.putInt("AmmoCount", ammo.ammoCount)
-                tag.putInt("Level", ammo.level)
-            }
-        }
-
-        // Запаковываем в предмет
-        val customData = CustomData.of(tag)
-        stack.set(DataComponents.CUSTOM_DATA, customData)
+    // 4. Накидываем чары для ЛЮБОГО предмета (Оружие или Вещь)
+    if (config.enchantments.isNotEmpty()) {
+        applyEnchantments(stack, player, config.enchantments)
     }
 
     return stack
-}
-
-fun applyEnchantments(stack: ItemStack, player: ServerPlayer, enchantments: List<EnchantData>): ItemStack {
-    if (enchantments != emptyList()) {
-        val enchRegistry = player.server.registryAccess().registryOrThrow(Registries.ENCHANTMENT)
-
-        for ((enchId, level) in enchantments.map { it.id to it.level }) {
-            val location = ResourceLocation.parse(enchId)
-            val enchKey = ResourceKey.create(Registries.ENCHANTMENT, location)
-            val holder = enchRegistry.getHolder(enchKey)
-
-            holder.ifPresent { ench ->
-                stack.enchant(ench, level)
-            }
-        }
-
-        return stack
-    } else return stack
 }
 
 fun nametags(player: ServerPlayer, type: NametagsFunType) {
