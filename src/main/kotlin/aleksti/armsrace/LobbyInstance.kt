@@ -1,6 +1,9 @@
 ﻿package aleksti.armsrace
 
+import net.minecraft.core.registries.Registries
 import net.minecraft.network.chat.Component
+import net.minecraft.resources.ResourceKey
+import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.effect.MobEffectInstance
 import net.minecraft.world.effect.MobEffects
@@ -58,9 +61,12 @@ class LobbyInstance(val id: Int, val template: LobbyTemplate) {
         // 3. Берем случайный спавн и телепортируем
         if (teamData.spawns.isNotEmpty()) {
             val spawn = teamData.spawns.random()
+            val world = player.serverLevel().server.getLevel(ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(spawn.world))) ?: player.serverLevel().server.getLevel(ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse("minecraft:overworld")))
             player.health = player.maxHealth
             if (template.instantRespawn == false) given(LobbyManager.playerLevels[player.uuid] ?: 0, player)
-            player.teleportTo(player.serverLevel(), spawn.x, spawn.y, spawn.z, player.yRot, player.xRot)
+            if (spawn.xRot != null) player.xRot = spawn.xRot.toFloat()
+            if (spawn.yRot != null) player.yRot = spawn.yRot.toFloat()
+            player.teleportTo(world, spawn.x, spawn.y, spawn.z, player.yRot, player.xRot)
             player.addEffect(MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, 60, 255, false, false))
         }
     }

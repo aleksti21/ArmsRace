@@ -19,7 +19,9 @@ data class SpawnPoint(
     val x: Double,
     val y: Double,
     val z: Double,
-//    val world: String
+    val world: String = "minecraft:overworld",
+    val yRot: Double? = null,
+    val xRot: Double? = null,
 )
 @Serializable
 data class TeamTemplate(
