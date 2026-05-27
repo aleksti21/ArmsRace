@@ -8,7 +8,7 @@
   "armsrace.scoreboard.players": "Игроков",
   "armsrace.scoreboard.starting_in": "Старт через",
   "armsrace.scoreboard.seconds": "%s сек",
-  "armsrace.scoreboard.arena": "Арена",
+  "armsrace.scoreboard.arena": "Карта",
   "armsrace.scoreboard.kills": "%s киллов",
   "error.armsrace.already_in_lobby": "Вы уже в лобби",
   "success.armsrace.joined": "Успешное присоединение к лобби "

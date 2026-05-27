@@ -17,19 +17,21 @@ class LobbyInstance(val id: Int, val template: LobbyTemplate) {
     var warmupTicks = -1
     val matchWeapons = mutableListOf<Weapon>()
     val matchArmor = mutableListOf<Armor>()
+    lateinit var currentMap: MapTemplate
 
     private fun success(message: String) = "§a[ArmsRace] $message"
     private fun error(message: String) = "§c[ArmsRace] $message"
 
     fun start(gameState: GameState): String {
         if (state != GameState.PLAYING && players.isNotEmpty()) {
-            val availableTeams = template.teams.map { it.teamId }
+            val availableTeams = currentMap.teams.map { it.teamId }
             if (availableTeams.isEmpty()) return error("Error: no teams found in template!")
             state = gameState
 
             if (state == GameState.WAITING) {
                 for (pool in template.weapons) matchWeapons.add(pool.options.random())
                 for (pool in template.armor) matchArmor.add(pool.options.random())
+                currentMap = template.maps.random()
             }
 
             for (p in players.keys.toList()) LobbyManager.playerLevels[p.uuid] = 0
@@ -56,11 +58,13 @@ class LobbyInstance(val id: Int, val template: LobbyTemplate) {
         val teamId = players[player] ?: return
 
         // 2. Ищем настройки этой команды в шаблоне
-        val teamData = template.teams.find { it.teamId == teamId } ?: return
+        val teamData = currentMap.teams.find { it.teamId == teamId } ?: return
 
         // 3. Берем случайный спавн и телепортируем
         if (teamData.spawns.isNotEmpty()) {
-            val spawn = teamData.spawns.random()
+//            val spawn = teamData.spawns.random()
+            val index = players.filterValues { it == teamId }.keys.toList().indexOf(player) % teamData.spawns.size
+            val spawn = teamData.spawns[index]
             val world = player.serverLevel().server.getLevel(ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(spawn.world))) ?: player.serverLevel().server.getLevel(ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse("minecraft:overworld")))
             player.health = player.maxHealth
             if (template.instantRespawn == false) given(LobbyManager.playerLevels[player.uuid] ?: 0, player)

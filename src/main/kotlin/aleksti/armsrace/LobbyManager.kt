@@ -28,11 +28,11 @@ object LobbyManager {
         // 2. Если игра УЖЕ на разминке (WAITING)
         if (lobby.state == GameState.WAITING) {
             // Находим команду, в которой меньше всего игроков (балансировщик)
-            val teamCounts = lobby.template.teams.associate { it.teamId to 0 }.toMutableMap()
+            val teamCounts = lobby.currentMap.teams.associate { it.teamId to 0 }.toMutableMap()
             lobby.players.values.filter { it.isNotEmpty() }.forEach { teamId ->
                 teamCounts[teamId] = teamCounts.getOrDefault(teamId, 0) + 1
             }
-            val bestTeamId = teamCounts.minByOrNull { it.value }?.key ?: lobby.template.teams.first().teamId
+            val bestTeamId = teamCounts.minByOrNull { it.value }?.key ?: lobby.currentMap.teams.first().teamId
 
             // Выдаем игроку эту команду
             lobby.players[player] = bestTeamId
@@ -80,7 +80,7 @@ object LobbyManager {
 
         if (id == null) {
             for (lobby in activeLobbies.values) {
-                val totalSpawns = lobby.template.teams.sumOf { it.spawns.size }
+                val totalSpawns = lobby.currentMap.teams.sumOf { it.spawns.size }
                 // Пускаем либо в LOBBY, либо в WAITING (если есть места)
                 if (lobby.state != GameState.PLAYING && lobby.players.size < totalSpawns) {
                     processPlayerJoin(player, lobby)
@@ -92,7 +92,7 @@ object LobbyManager {
             val lobby = activeLobbies[id] ?: return "error.armsrace.lobby_not_found"
 
             // Тут тоже проверяем, что игра еще не началась и есть места
-            val totalSpawns = lobby.template.teams.sumOf { it.spawns.size }
+            val totalSpawns = lobby.currentMap.teams.sumOf { it.spawns.size }
             if (lobby.state == GameState.PLAYING || lobby.players.size >= totalSpawns) {
                 return "error.armsrace.lobby_full_or_playing"
             }

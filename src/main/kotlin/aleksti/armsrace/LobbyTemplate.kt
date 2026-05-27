@@ -31,6 +31,13 @@ data class TeamTemplate(
 )
 
 @Serializable
+data class MapTemplate(
+    val id: String,
+    val name: String = id,
+    val teams: List<TeamTemplate>,
+)
+
+@Serializable
 data class AdditionalItem(
     override val id: String,
     override val enchantments: List<EnchantData> = emptyList(),
@@ -104,7 +111,7 @@ data class EnchantData(
 data class LobbyTemplate(
     val templateId: String,
     val displayName: String = "§6§lГОНКА ВООРУЖЕНИЙ",
-    val teams: List<TeamTemplate>,
+    val maps: List<MapTemplate>,
     val instantRespawn: Boolean = true,
     val allowBlockBreaking: Boolean = false,
     val weapons: List<WeaponPool>,

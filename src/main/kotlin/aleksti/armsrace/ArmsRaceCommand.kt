@@ -109,7 +109,7 @@ class ArmsRaceCommand {
                                 }
 
                                 // Проверяем, существует ли такая команда в шаблоне лобби
-                                val teamExists = lobby.template.teams.any { it.teamId == newTeamId }
+                                val teamExists = lobby.currentMap.teams.any { it.teamId == newTeamId }
                                 if (!teamExists) {
                                     ctx.source.sendFailure(Component.literal("Команды $newTeamId не существует в этой арене!"))
                                     return@executes 0

@@ -72,10 +72,12 @@ object ScoreboardManager {
                 )
             }
         } else if (lobby.state == GameState.PLAYING) {
+            val map = Component.literal(lobby.currentMap.name).withStyle(ChatFormatting.YELLOW)
             sendLine(
                 Component.translatable("armsrace.scoreboard.arena")
                     .append(Component.literal(": "))
-                    .append(Component.literal("Арена 1").withStyle(ChatFormatting.YELLOW)),
+                    .append(Component.literal("").withStyle(ChatFormatting.YELLOW))
+                    .append(map),
                 lineScore--
             )
             sendLine(Component.literal("------------------").withStyle(ChatFormatting.GRAY), lineScore--)
@@ -84,7 +86,7 @@ object ScoreboardManager {
 
             for ((index, p) in sortedPlayers.withIndex()) {
                 val playerTeamId = lobby.players[p] ?: ""
-                val team = lobby.template.teams.find { it.teamId == playerTeamId }
+                val team = lobby.currentMap.teams.find { it.teamId == playerTeamId }
                 val teamColor = team?.colorCode?.let { ChatFormatting.getByName(it) } ?: ChatFormatting.WHITE
 
                 val kills = LobbyManager.playerLevels[p.uuid] ?: 0
