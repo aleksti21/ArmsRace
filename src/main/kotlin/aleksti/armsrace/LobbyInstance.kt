@@ -2,6 +2,7 @@
 
 import net.minecraft.core.registries.Registries
 import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.MutableComponent
 import net.minecraft.resources.ResourceKey
 import net.minecraft.resources.ResourceLocation
 import net.minecraft.server.level.ServerPlayer
@@ -19,10 +20,7 @@ class LobbyInstance(val id: Int, val template: LobbyTemplate) {
     val matchArmor = mutableListOf<Armor>()
     lateinit var currentMap: MapTemplate
 
-    private fun success(message: String) = "§a[ArmsRace] $message"
-    private fun error(message: String) = "§c[ArmsRace] $message"
-
-    fun start(gameState: GameState): String {
+    fun start(gameState: GameState): MutableComponent {
         if (state != GameState.PLAYING && players.isNotEmpty()) {
             state = gameState
             if (state == GameState.WAITING) {
@@ -31,7 +29,7 @@ class LobbyInstance(val id: Int, val template: LobbyTemplate) {
                 currentMap = template.maps.random()
             }
             val availableTeams = currentMap.teams.map { it.teamId }
-            if (availableTeams.isEmpty()) return error("Error: no teams found in template!")
+            if (availableTeams.isEmpty()) return text("no_teams", TextType.ERROR)
 
             for (p in players.keys.toList()) LobbyManager.playerLevels[p.uuid] = 0
             for ((index, player) in players.keys.toList().withIndex()) {
@@ -47,8 +45,8 @@ class LobbyInstance(val id: Int, val template: LobbyTemplate) {
                 given(0, player)
                 for (i in template.additionalItems) player.inventory.setItem(i.slot, buildAndEnchantItem(i, player))
             }
-        } else return error("Not enough players or the game is already running")
-        return success("Game started")
+        } else return text("alredy_run", TextType.ERROR)
+        return text("game_start", TextType.SUCCESS)
     }
 
     // Функция сама узнает команду игрока и телепортирует его куда надо
@@ -64,7 +62,7 @@ class LobbyInstance(val id: Int, val template: LobbyTemplate) {
 //            val spawn = teamData.spawns.random()
             val index = players.filterValues { it == teamId }.keys.toList().indexOf(player) % teamData.spawns.size
             val spawn = teamData.spawns[index]
-            val world = player.serverLevel().server.getLevel(ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(spawn.world))) ?: player.serverLevel().server.getLevel(ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse("minecraft:overworld")))
+            val world = player.serverLevel().server.getLevel(ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(spawn.world))) ?: player.serverLevel()
             player.health = player.maxHealth
             if (template.instantRespawn == false) given(LobbyManager.playerLevels[player.uuid] ?: 0, player)
             if (spawn.xRot != null) player.xRot = spawn.xRot.toFloat()
@@ -139,6 +137,12 @@ class LobbyInstance(val id: Int, val template: LobbyTemplate) {
                     player.setItemSlot(slot, ItemStack.EMPTY)
                 }
             }
+        } else {
+            player.setItemSlot(EquipmentSlot.HEAD, ItemStack.EMPTY)
+            player.setItemSlot(EquipmentSlot.CHEST, ItemStack.EMPTY)
+            player.setItemSlot(EquipmentSlot.LEGS, ItemStack.EMPTY)
+            player.setItemSlot(EquipmentSlot.FEET, ItemStack.EMPTY)
+            player.setItemSlot(EquipmentSlot.OFFHAND, ItemStack.EMPTY)
         }
         for (i in matchWeapons[level].additionalItems) player.inventory.setItem(i.slot, buildAndEnchantItem(i,player))
     }

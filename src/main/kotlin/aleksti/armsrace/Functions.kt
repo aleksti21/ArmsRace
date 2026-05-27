@@ -1,5 +1,6 @@
 package aleksti.armsrace
 
+import net.minecraft.ChatFormatting
 import net.minecraft.core.component.DataComponents
 import net.minecraft.core.registries.BuiltInRegistries
 import net.minecraft.nbt.CompoundTag
@@ -10,6 +11,8 @@ import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
 import net.minecraft.world.item.component.CustomData
 import net.minecraft.core.registries.Registries
+import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.MutableComponent
 import net.minecraft.network.protocol.game.ClientboundSetPlayerTeamPacket
 import net.minecraft.resources.ResourceKey
 import net.minecraft.world.scores.PlayerTeam
@@ -19,6 +22,14 @@ import net.minecraft.world.scores.Team
 enum class NametagsFunType {
     SHOW,
     HIDE
+}
+
+enum class TextType(val prefix: String, val color: ChatFormatting) {
+    INFO("info", ChatFormatting.WHITE),
+    SUCCESS("success", ChatFormatting.GREEN),
+    ERROR("error", ChatFormatting.RED),
+    WARNING("warning", ChatFormatting.YELLOW),
+    GAME("game", ChatFormatting.GOLD),
 }
 
 fun getItemFromString(id: String?): Item {
@@ -146,3 +157,5 @@ fun nametags(player: ServerPlayer, type: NametagsFunType) {
         }
     } else if (type == NametagsFunType.SHOW) player.connection.send(ClientboundSetPlayerTeamPacket.createRemovePacket(team))
 }
+
+fun text(key: String, type: TextType = TextType.INFO, vararg args: Any): MutableComponent = if (type != TextType.GAME) Component.literal("[ArmsRace] ").append(Component.translatable("${type.prefix}.armsrace.$key", *args).withStyle(type.color)) else Component.translatable("${type.prefix}.armsrace.$key", *args).withStyle(type.color)

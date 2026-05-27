@@ -1,5 +1,6 @@
 package aleksti.armsrace
 
+import net.minecraft.ChatFormatting
 import net.minecraft.network.chat.Component
 import net.neoforged.neoforge.event.entity.player.PlayerEvent
 import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket
@@ -31,7 +32,6 @@ object GameEvents {
         if (lobby.state == GameState.LOBBY) return
         val newLevel = level + 1
         LobbyManager.playerLevels[source.uuid] = newLevel
-//        val index = lobby.matchWeapons.getOrNull(newLevel)?.id
         if (lobby.matchWeapons.getOrNull(newLevel) == null) {
             event.isCanceled = true
             entity.health = entity.maxHealth
@@ -41,13 +41,18 @@ object GameEvents {
                     player.health = player.maxHealth
                     player.inventory.clearContent()
                     player.connection.send(ClientboundSetTitlesAnimationPacket(10, 60, 20))
-                    player.connection.send(ClientboundSetTitleTextPacket(Component.literal("§6§lИГРА ОКОНЧЕНА")))
-                    player.connection.send(ClientboundSetSubtitleTextPacket(Component.literal("§fПобедил: §a${source.displayName?.string ?: source.name.string}")))
+//                    player.connection.send(ClientboundSetTitleTextPacket(Component.literal("§6§lИГРА ОКОНЧЕНА")))
+//                    player.connection.send(ClientboundSetSubtitleTextPacket(Component.literal("§fПобедил: §a${source.displayName?.string ?: source.name.string}")))
+                    player.connection.send(ClientboundSetTitleTextPacket(text("title_game_over", TextType.GAME).withStyle(
+                        ChatFormatting.BOLD)))
+                    player.connection.send(ClientboundSetSubtitleTextPacket(text("subtitle_game_over", TextType.GAME).withStyle(
+                        ChatFormatting.WHITE).append(Component.literal(source.displayName?.string ?: source.name.string).withStyle(
+                        ChatFormatting.GREEN))))
                 }
                 lobby.state = GameState.FINISHED
                 lobby.warmupTicks = 100 // 5 секунд = 5 * 20 тиков
             } else if (lobby.state == GameState.WAITING) {
-                source.displayClientMessage(Component.literal("§eЭто было последнее оружие!"), true)
+                source.displayClientMessage(text("last_weapon", TextType.GAME), true)
                 source.playNotifySound(SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 1.0f, 1.0f)
                 if (lobby2.template.instantRespawn == false) return
                 lobby2.teleportPlayerToSpawn(entity)
@@ -56,7 +61,8 @@ object GameEvents {
 
         } else {
             lobby.given(newLevel, source)
-            source.displayClientMessage(Component.literal("§eОружие: ${newLevel}/${lobby.template.weapons.size}"), true)
+//            source.displayClientMessage(Component.literal("§eОружие: ${newLevel}/${lobby.template.weapons.size}"), true)
+            source.displayClientMessage(text("weapon", TextType.GAME, args = arrayOf(newLevel, lobby.template.weapons.size)), true)
             source.playNotifySound(SoundEvents.PLAYER_LEVELUP, SoundSource.PLAYERS, 1.0f, 1.0f)
             for (player in lobby.players.keys) ScoreboardManager.updateScoreboard(player, lobby)
             if (lobby2.state == GameState.LOBBY) return

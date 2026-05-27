@@ -15,14 +15,14 @@ class ArmsRaceCommand {
             Commands.literal("armsrace")
                 .executes { ctx ->
                     // Это сработает, если игрок введет просто /armsrace
-                    ctx.source.sendSuccess({ Component.literal("Используйте: /armsrace create | join | leave | start") }, false)
+                    ctx.source.sendSuccess({ text("command_armsrace", TextType.ERROR) }, false)
                     1
                 }
                 .then(
                     Commands.literal("create")
                     .requires { sourceStack -> sourceStack.hasPermission(2) }
                     .executes { ctx ->
-                        ctx.source.sendSuccess({ Component.literal("Введите параметр id") }, false)
+                        ctx.source.sendSuccess({ text("command_create", TextType.ERROR) }, false)
                         1
                     }
 
@@ -35,22 +35,22 @@ class ArmsRaceCommand {
                             SharedSuggestionProvider.suggest(availableIds, builder)
                         }
                         .executes { ctx ->
-                            ctx.source.sendSuccess({ Component.literal(LobbyManager.createLobby(StringArgumentType.getString(ctx, "template_id")))}, false)
+                            ctx.source.sendSuccess({LobbyManager.createLobby(StringArgumentType.getString(ctx, "template_id"))}, false)
                             1
                         }
                     ))
                 .then(
                     Commands.literal("join")
                     .executes { ctx ->
-                        ctx.source.sendSuccess({ Component.literal(LobbyManager.addPlayer(ctx.source.playerOrException)) }, false)
+                        ctx.source.sendSuccess({LobbyManager.addPlayer(ctx.source.playerOrException) }, false)
                         1
                     }
                     .then(
                         Commands.argument("lobby_id", IntegerArgumentType.integer(1))
                         .executes {ctx ->
-                            ctx.source.sendSuccess({ Component.literal(
+                            ctx.source.sendSuccess({
                                 LobbyManager.addPlayer(ctx.source.playerOrException,
-                                IntegerArgumentType.getInteger(ctx, "lobby_id"))) }, false)
+                                IntegerArgumentType.getInteger(ctx, "lobby_id")) }, false)
                             1
                         })
                 )
@@ -58,20 +58,20 @@ class ArmsRaceCommand {
                     Commands.literal("start")
                     .requires { sourceStack -> sourceStack.hasPermission(2) }
                     .executes { ctx ->
-                        ctx.source.sendSuccess({ Component.literal(LobbyManager.startCommand(LobbyManager.findLobbyByPlayer(ctx.source.playerOrException)?.id))}, false)
+                        ctx.source.sendSuccess({LobbyManager.startCommand(LobbyManager.findLobbyByPlayer(ctx.source.playerOrException)?.id)}, false)
                         1
                     }
                     .then(
                         Commands.argument("start_id", IntegerArgumentType.integer(1))
                         .executes {ctx ->
-                            ctx.source.sendSuccess({ Component.literal(LobbyManager.startCommand(IntegerArgumentType.getInteger(ctx, "start_id")))}, false)
+                            ctx.source.sendSuccess({LobbyManager.startCommand(IntegerArgumentType.getInteger(ctx, "start_id"))}, false)
                             1
                         })
                 )
                 .then(
                     Commands.literal("leave")
                     .executes { ctx ->
-                        ctx.source.sendSuccess({ Component.literal(LobbyManager.removePlayer(ctx.source.playerOrException)) }, false)
+                        ctx.source.sendSuccess({LobbyManager.removePlayer(ctx.source.playerOrException)}, false)
                         1
                     }
                 )
@@ -79,13 +79,13 @@ class ArmsRaceCommand {
                     Commands.literal("stop")
                     .requires { sourceStack -> sourceStack.hasPermission(2) }
                     .executes { ctx ->
-                        ctx.source.sendSuccess({ Component.literal(LobbyManager.deleteLobby(LobbyManager.findLobbyByPlayer(ctx.source.playerOrException)?.id))}, false)
+                        ctx.source.sendSuccess({LobbyManager.deleteLobby(LobbyManager.findLobbyByPlayer(ctx.source.playerOrException)?.id)}, false)
                         1
                     }
                     .then(
                         Commands.argument("stop_id", IntegerArgumentType.integer(1))
                         .executes { ctx ->
-                            ctx.source.sendSuccess({ Component.literal(LobbyManager.deleteLobby(IntegerArgumentType.getInteger(ctx, "stop_id")))}, false)
+                            ctx.source.sendSuccess({ LobbyManager.deleteLobby(IntegerArgumentType.getInteger(ctx, "stop_id"))}, false)
                             1
                         })
                 )
