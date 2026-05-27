@@ -80,9 +80,9 @@ object LobbyManager {
 
         if (id == null) {
             for (lobby in activeLobbies.values) {
-                val totalSpawns = lobby.currentMap.teams.sumOf { it.spawns.size }
+//                val totalSpawns = lobby.currentMap.teams.sumOf { it.spawns.size }
                 // Пускаем либо в LOBBY, либо в WAITING (если есть места)
-                if (lobby.state != GameState.PLAYING && lobby.players.size < totalSpawns) {
+                if (lobby.state == GameState.LOBBY || lobby.state == GameState.WAITING) {
                     processPlayerJoin(player, lobby)
                     return "success.armsrace.joined"
                 }
@@ -94,12 +94,11 @@ object LobbyManager {
             // Тут тоже проверяем, что игра еще не началась и есть места
             val totalSpawns = lobby.currentMap.teams.sumOf { it.spawns.size }
             if (lobby.state == GameState.PLAYING || lobby.players.size >= totalSpawns) {
-                return "error.armsrace.lobby_full_or_playing"
+                processPlayerJoin(player, lobby)
+                return "success.armsrace.joined"
             }
-
-            processPlayerJoin(player, lobby)
-            return "success.armsrace.joined"
         }
+        return "error.armsrace.no_lobby"
     }
 
     fun removePlayer(player: ServerPlayer): String {

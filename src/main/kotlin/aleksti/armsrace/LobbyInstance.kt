@@ -24,15 +24,14 @@ class LobbyInstance(val id: Int, val template: LobbyTemplate) {
 
     fun start(gameState: GameState): String {
         if (state != GameState.PLAYING && players.isNotEmpty()) {
-            val availableTeams = currentMap.teams.map { it.teamId }
-            if (availableTeams.isEmpty()) return error("Error: no teams found in template!")
             state = gameState
-
             if (state == GameState.WAITING) {
                 for (pool in template.weapons) matchWeapons.add(pool.options.random())
                 for (pool in template.armor) matchArmor.add(pool.options.random())
                 currentMap = template.maps.random()
             }
+            val availableTeams = currentMap.teams.map { it.teamId }
+            if (availableTeams.isEmpty()) return error("Error: no teams found in template!")
 
             for (p in players.keys.toList()) LobbyManager.playerLevels[p.uuid] = 0
             for ((index, player) in players.keys.toList().withIndex()) {
