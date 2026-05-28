@@ -117,6 +117,9 @@ class LobbyInstance(val id: Int, val template: LobbyTemplate) {
     }
     
     fun given(level: Int, player: ServerPlayer) {
+        for (i in 0 until 36) player.inventory.setItem(i, ItemStack.EMPTY)
+        for (i in template.additionalItems) player.inventory.setItem(i.slot,  buildAndEnchantItem(i, player))
+
         player.inventory.selected = 0
         player.setItemSlot(EquipmentSlot.MAINHAND, buildAndEnchantItem(matchWeapons[level], player))
         

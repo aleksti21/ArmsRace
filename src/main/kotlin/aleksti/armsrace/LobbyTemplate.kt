@@ -10,6 +10,7 @@ enum class GameState {
 
 interface ConfigItem {
     val id: String
+    val nbt: String?
     val enchantments: List<EnchantData>
         get() = emptyList()
 }
@@ -41,6 +42,7 @@ data class MapTemplate(
 data class AdditionalItem(
     override val id: String,
     override val enchantments: List<EnchantData> = emptyList(),
+    override val nbt: String? = null,
     val count: Int = 1,
     val slot: Int,
     val ammoData: AmmoData? = null,
@@ -60,6 +62,7 @@ data class Armor(
 data class ArmorPiece(
     override val id: String,
     override val enchantments: List<EnchantData> = emptyList(),
+    override val nbt: String? = null,
 ): ConfigItem
 
 @Serializable
@@ -71,6 +74,7 @@ data class ArmorPool(
 data class Weapon(
     override val id: String,
     override val enchantments: List<EnchantData> = emptyList(),
+    override val nbt: String? = null,
     val taczData: TaczData? = null,
     val additionalItems: List<AdditionalItem> = emptyList(),
 ): ConfigItem

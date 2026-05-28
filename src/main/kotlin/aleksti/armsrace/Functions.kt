@@ -11,6 +11,7 @@ import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
 import net.minecraft.world.item.component.CustomData
 import net.minecraft.core.registries.Registries
+import net.minecraft.nbt.TagParser
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.MutableComponent
 import net.minecraft.network.protocol.game.ClientboundSetPlayerTeamPacket
@@ -113,6 +114,13 @@ private fun applyEnchantments(stack: ItemStack, player: ServerPlayer, enchantmen
     return stack
 }
 
+private fun nbtItem(stack: ItemStack, nbt: String?): ItemStack {
+    val parsedNbt = TagParser.parseTag(nbt)
+    val currentCustomData = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY)
+    stack.set(DataComponents.CUSTOM_DATA, currentCustomData.update { it.merge(parsedNbt) })
+    return stack
+}
+
 fun buildAndEnchantItem(config: ConfigItem, player: ServerPlayer): ItemStack {
     // 1. Создаем базовый предмет
     val mcItem = getItemFromString(config.id)
@@ -133,6 +141,10 @@ fun buildAndEnchantItem(config: ConfigItem, player: ServerPlayer): ItemStack {
     // 4. Накидываем чары для ЛЮБОГО предмета (Оружие или Вещь)
     if (config.enchantments.isNotEmpty()) {
         applyEnchantments(stack, player, config.enchantments)
+    }
+
+    if (config.nbt != null) {
+        nbtItem(stack, config.nbt)
     }
 
     return stack
