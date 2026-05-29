@@ -16,16 +16,23 @@ class LobbyInstance(val id: Int, val template: LobbyTemplate) {
     val players = mutableMapOf<ServerPlayer, String>()
     var state = GameState.LOBBY
     var warmupTicks = -1
-    val matchWeapons = mutableListOf<Weapon>()
-    val matchArmor = mutableListOf<Armor>()
+//    val matchWeapons = mutableListOf<Weapon>()
+//    val matchArmor = mutableListOf<Armor>()
+    val matchWeaponSeeds = mutableListOf<Int>()
+    val matchArmorSeeds = mutableListOf<Int>()
     lateinit var currentMap: MapTemplate
 
     fun start(gameState: GameState): MutableComponent {
         if (state != GameState.PLAYING && players.isNotEmpty()) {
             state = gameState
             if (state == GameState.WAITING) {
-                for (pool in template.weapons) matchWeapons.add(pool.options.random())
-                for (pool in template.armor) matchArmor.add(pool.options.random())
+                matchWeaponSeeds.clear()
+                matchArmorSeeds.clear()
+                for (pool in template.weapons) matchWeaponSeeds.add(kotlin.random.Random.nextInt())
+                for (pool in template.weapons) matchArmorSeeds.add(kotlin.random.Random.nextInt())
+//                for (pool in template.weapons) matchWeapons.add(pool.options.random())
+//                for (pool in template.armor) matchArmor.add(pool.options.random())
+
                 currentMap = template.maps.random()
             }
             val availableTeams = currentMap.teams.map { it.teamId }
@@ -118,27 +125,89 @@ class LobbyInstance(val id: Int, val template: LobbyTemplate) {
     
     fun given(level: Int, player: ServerPlayer) {
         for (i in 0 until 36) player.inventory.setItem(i, ItemStack.EMPTY)
-        for (i in template.additionalItems) player.inventory.setItem(i.slot,  buildAndEnchantItem(i, player))
+        for (i in template.additionalItems) player.inventory.setItem(i.slot, buildAndEnchantItem(i, player))
 
         player.inventory.selected = 0
-        if (matchWeapons[level].teamId != players[player])
-        player.setItemSlot(EquipmentSlot.MAINHAND, buildAndEnchantItem(matchWeapons[level], player))
-        
-        val armorData = matchArmor.getOrNull(level)
-        if (armorData != null) {
-            val armorMap = mapOf(
-                EquipmentSlot.HEAD to armorData.helmet,
-                EquipmentSlot.CHEST to armorData.chestplate,
-                EquipmentSlot.LEGS to armorData.leggings,
-                EquipmentSlot.FEET to armorData.boots,
-                EquipmentSlot.OFFHAND to armorData.shield
-            )
-            
-            for ((slot, armorItem) in armorMap) {
-                if (armorItem != null) {
-                    player.setItemSlot(slot, buildAndEnchantItem(armorItem, player))
-                } else if (armorData.replacePreviousOnEmpty) {
-                    player.setItemSlot(slot, ItemStack.EMPTY)
+//        if (matchWeapons[level].teamId != players[player])
+//        player.setItemSlot(EquipmentSlot.MAINHAND, buildAndEnchantItem(matchWeapons[level], player))
+//
+//        val armorData = matchArmor.getOrNull(level)
+//        if (armorData != null) {
+//            val armorMap = mapOf(
+//                EquipmentSlot.HEAD to armorData.helmet,
+//                EquipmentSlot.CHEST to armorData.chestplate,
+//                EquipmentSlot.LEGS to armorData.leggings,
+//                EquipmentSlot.FEET to armorData.boots,
+//                EquipmentSlot.OFFHAND to armorData.shield
+//            )
+//
+//            for ((slot, armorItem) in armorMap) {
+//                if (armorItem != null) {
+//                    player.setItemSlot(slot, buildAndEnchantItem(armorItem, player))
+//                } else if (armorData.replacePreviousOnEmpty) {
+//                    player.setItemSlot(slot, ItemStack.EMPTY)
+//                }
+//            }
+//        } else {
+//            player.setItemSlot(EquipmentSlot.HEAD, ItemStack.EMPTY)
+//            player.setItemSlot(EquipmentSlot.CHEST, ItemStack.EMPTY)
+//            player.setItemSlot(EquipmentSlot.LEGS, ItemStack.EMPTY)
+//            player.setItemSlot(EquipmentSlot.FEET, ItemStack.EMPTY)
+//            player.setItemSlot(EquipmentSlot.OFFHAND, ItemStack.EMPTY)
+//        }
+//        for (i in matchWeapons[level].additionalItems) player.inventory.setItem(i.slot, buildAndEnchantItem(i,player))
+//    }
+        val weaponPool = template.weapons.getOrNull(level)
+        if (weaponPool != null) {
+            val playerTeam = players[player]
+            // Оставляем только те пушки, которые для всех (null) или для команды игрока
+            val validWeapons = weaponPool.options.filter { it.teamId == null || it.teamId == playerTeam }
+
+            if (validWeapons.isNotEmpty()) {
+                val seed = matchWeaponSeeds.getOrElse(level) { 0 }
+                // Математика: берем остаток от деления, чтобы индекс не вышел за пределы
+                val weaponIndex = kotlin.math.abs(seed) % validWeapons.size
+                val weaponToGive = validWeapons[weaponIndex]
+
+                player.setItemSlot(EquipmentSlot.MAINHAND, buildAndEnchantItem(weaponToGive, player))
+
+                // Выдаем доп. предметы ТОЛЬКО если выдалась пушка (внутри блока!)
+                for (i in weaponToGive.additionalItems) {
+                    player.inventory.setItem(i.slot, buildAndEnchantItem(i, player))
+                }
+            }
+        }
+
+        // --- ВЫДАЧА БРОНИ ---
+        val armorPool = template.armor.getOrNull(level)
+        if (armorPool != null) {
+            val playerTeam = players[player]
+            val validArmor = armorPool.options.filter {
+                // У брони teamId лежит внутри элементов (шлема и тд).
+                // Чтобы не усложнять, берем первую подходящую,
+                // если хотя бы одна вещь из сета подходит игроку или всем.
+                it.helmet?.teamId == null || it.helmet.teamId == playerTeam
+            }
+
+            if (validArmor.isNotEmpty()) {
+                val seed = matchArmorSeeds.getOrElse(level) { 0 }
+                val armorIndex = kotlin.math.abs(seed) % validArmor.size
+                val armorData = validArmor[armorIndex]
+
+                val armorMap = mapOf(
+                    EquipmentSlot.HEAD to armorData.helmet,
+                    EquipmentSlot.CHEST to armorData.chestplate,
+                    EquipmentSlot.LEGS to armorData.leggings,
+                    EquipmentSlot.FEET to armorData.boots,
+                    EquipmentSlot.OFFHAND to armorData.shield
+                )
+
+                for ((slot, armorItem) in armorMap) {
+                    if (armorItem != null) {
+                        player.setItemSlot(slot, buildAndEnchantItem(armorItem, player))
+                    } else if (armorData.replacePreviousOnEmpty) {
+                        player.setItemSlot(slot, ItemStack.EMPTY)
+                    }
                 }
             }
         } else {
@@ -148,6 +217,5 @@ class LobbyInstance(val id: Int, val template: LobbyTemplate) {
             player.setItemSlot(EquipmentSlot.FEET, ItemStack.EMPTY)
             player.setItemSlot(EquipmentSlot.OFFHAND, ItemStack.EMPTY)
         }
-        for (i in matchWeapons[level].additionalItems) player.inventory.setItem(i.slot, buildAndEnchantItem(i,player))
     }
 }
