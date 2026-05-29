@@ -1,3 +1,5 @@
+![armsrace logo](https://cdn.modrinth.com/data/cached_images/94c7c54ee549e6310e8aac8e630beed3b855d217.png)
+
 # 🔫 Arms Race (Mini-Game Mod)
 **⚠️ BETA** *This mod is currently in early development. Core mechanics work, but full compatibility with other mods is still being tested. Bug reports and feedback are highly appreciated!*
 
