@@ -13,6 +13,8 @@ interface ConfigItem {
     val nbt: String?
     val enchantments: List<EnchantData>
         get() = emptyList()
+    val unbreakable: Boolean?
+        get() = true
 }
 
 @Serializable
@@ -43,6 +45,7 @@ data class AdditionalItem(
     override val id: String,
     override val enchantments: List<EnchantData> = emptyList(),
     override val nbt: String? = null,
+    override val unbreakable: Boolean? = null,
     val count: Int = 1,
     val slot: Int,
     val ammoData: AmmoData? = null,
@@ -63,6 +66,8 @@ data class ArmorPiece(
     override val id: String,
     override val enchantments: List<EnchantData> = emptyList(),
     override val nbt: String? = null,
+    override val unbreakable: Boolean? = true,
+    val teamId: String? = null,
 ): ConfigItem
 
 @Serializable
@@ -75,8 +80,10 @@ data class Weapon(
     override val id: String,
     override val enchantments: List<EnchantData> = emptyList(),
     override val nbt: String? = null,
+    override val unbreakable: Boolean? = true,
     val taczData: TaczData? = null,
     val additionalItems: List<AdditionalItem> = emptyList(),
+    val teamId: String? = null,
 ): ConfigItem
 
 @Serializable
@@ -126,4 +133,5 @@ data class LobbyTemplate(
     val warmupTime: Int = 60,
     val warmup: Boolean = true,
     val lobbyCoord: SpawnPoint,
+    val allowItemToss: Boolean = false,
 )

@@ -16,6 +16,7 @@ import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.MutableComponent
 import net.minecraft.network.protocol.game.ClientboundSetPlayerTeamPacket
 import net.minecraft.resources.ResourceKey
+import net.minecraft.world.item.component.Unbreakable
 import net.minecraft.world.scores.PlayerTeam
 import net.minecraft.world.scores.Scoreboard
 import net.minecraft.world.scores.Team
@@ -122,30 +123,16 @@ private fun nbtItem(stack: ItemStack, nbt: String?): ItemStack {
 }
 
 fun buildAndEnchantItem(config: ConfigItem, player: ServerPlayer): ItemStack {
-    // 1. Создаем базовый предмет
     val mcItem = getItemFromString(config.id)
-    // У AdditionalItem может быть count, у Weapon его нет. Берем 1 по умолчанию.
     val count = if (config is AdditionalItem) config.count else 1
     val stack = ItemStack(mcItem, count)
 
-    // 2. Если это Weapon — накидываем NBT от TaC:Z
-    if (config is Weapon && config.taczData != null) {
-        // Твоя логика из taczItem, но применяем её к уже созданному stack
-        taczItem(stack, config.taczData)
-    }
-    // 3. Если это AdditionalItem с патронами (твой бывший AmmoBox)
-    else if (config is AdditionalItem && config.ammoData != null) {
-        AmmoBox(stack, config.ammoData)
-    }
+    if (config is Weapon && config.taczData != null) taczItem(stack, config.taczData)
+    else if (config is AdditionalItem && config.ammoData != null) AmmoBox(stack, config.ammoData)
 
-    // 4. Накидываем чары для ЛЮБОГО предмета (Оружие или Вещь)
-    if (config.enchantments.isNotEmpty()) {
-        applyEnchantments(stack, player, config.enchantments)
-    }
-
-    if (config.nbt != null) {
-        nbtItem(stack, config.nbt)
-    }
+    if (config.enchantments.isNotEmpty()) applyEnchantments(stack, player, config.enchantments)
+    if (config.nbt != null) nbtItem(stack, config.nbt)
+    if (config.unbreakable == true) stack.set(DataComponents.UNBREAKABLE, Unbreakable(true))
 
     return stack
 }

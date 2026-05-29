@@ -121,6 +121,7 @@ class LobbyInstance(val id: Int, val template: LobbyTemplate) {
         for (i in template.additionalItems) player.inventory.setItem(i.slot,  buildAndEnchantItem(i, player))
 
         player.inventory.selected = 0
+        if (matchWeapons[level].teamId != players[player])
         player.setItemSlot(EquipmentSlot.MAINHAND, buildAndEnchantItem(matchWeapons[level], player))
         
         val armorData = matchArmor.getOrNull(level)

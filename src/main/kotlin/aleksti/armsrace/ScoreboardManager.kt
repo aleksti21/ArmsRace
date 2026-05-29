@@ -76,7 +76,6 @@ object ScoreboardManager {
             sendLine(
                 Component.translatable("armsrace.scoreboard.arena")
                     .append(Component.literal(": "))
-                    .append(Component.literal("").withStyle(ChatFormatting.YELLOW))
                     .append(map),
                 lineScore--
             )
@@ -89,14 +88,12 @@ object ScoreboardManager {
                 val team = lobby.currentMap.teams.find { it.teamId == playerTeamId }
                 val teamColor = team?.colorCode?.let { ChatFormatting.getByName(it) } ?: ChatFormatting.WHITE
 
-                val kills = LobbyManager.playerLevels[p.uuid] ?: 0
+                val kills = Component.literal("${LobbyManager.playerLevels[p.uuid] ?: 0}").withStyle(ChatFormatting.GOLD)
                 val nameComp = Component.literal(p.name.string).withStyle(teamColor)
-                val killsComp =
-                    Component.translatable("armsrace.scoreboard.kills", kills).withStyle(ChatFormatting.GREEN)
                 val finalLine = Component.empty()
                     .append(nameComp)
                     .append(Component.literal(": ").withStyle(ChatFormatting.WHITE))
-                    .append(killsComp)
+                    .append(kills)
 
                 sendLine(finalLine, lineScore--)
 

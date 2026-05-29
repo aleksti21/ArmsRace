@@ -2,7 +2,7 @@
   "error.armsrace.command_armsrace": "Use /armsrace join | create | leave | setteam | stop | reload",
   "error.armsrace.command_create": "You must specify a template ID to create a lobby.",
   "game.armsrace.title_game_over": "Game Over!",
-  "game.armsrace.subtitle_game_over": "Thanks for playing!",
+  "game.armsrace.subtitle_game_over": "Winner: ",
   "game.armsrace.last_weapon": "You have the last weapon!",
   "game.armsrace.weapon": "You have reached level %s of %s",
   "error.armsrace.no_teams": "There are no available teams on this map.",
@@ -21,6 +21,5 @@
   "armsrace.scoreboard.players": "Players",
   "armsrace.scoreboard.starting_in": "Starting in",
   "armsrace.scoreboard.seconds": "%s seconds",
-  "armsrace.scoreboard.arena": "Map",
-  "armsrace.scoreboard.kills": "Kills: %s"
+  "armsrace.scoreboard.arena": "Map"
 }

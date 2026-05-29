@@ -92,16 +92,6 @@ object GameEvents {
     }
 
     @SubscribeEvent
-    fun onEntityDrop(event: ItemTossEvent) = runIfInGame(event.entity) { player, lobby ->
-        event.isCanceled = true // Запрещаем выбрасывать на Q
-    }
-
-    @SubscribeEvent
-    fun onEntityDeathDrop(event: LivingDropsEvent) = runIfInGame(event.entity) { player, lobby ->
-        event.isCanceled = true // Запрещаем выпадение лута при смерти
-    }
-
-    @SubscribeEvent
     fun onBlockBreak(event: PlayerInteractEvent.LeftClickBlock) = runIfInGame(event.entity) { player, lobby ->
         if (lobby.template.allowBlockBreaking == false) event.isCanceled = true
     }
@@ -121,6 +111,9 @@ object GameEvents {
         val source = event.source.entity as? ServerPlayer ?: return
         if (lobby.players[player] == lobby.players[source]) event.isCanceled = true
     }
+
+    @SubscribeEvent
+    fun onItemToss(event: ItemTossEvent) = runIfInGame(event.player) {player, lobby -> if (lobby.template.allowItemToss == false) event.isCanceled = true }
 
     @SubscribeEvent
     fun onPlayerLogout(event: PlayerEvent.PlayerLoggedOutEvent) {
