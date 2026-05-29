@@ -58,7 +58,8 @@ data class Armor(
     val leggings: ArmorPiece? = null,
     val boots: ArmorPiece? = null,
     val shield: ArmorPiece? = null,
-    val replacePreviousOnEmpty: Boolean = true,
+    val replacePreviousOnEmpty: Boolean = false,
+    val teamId: String? = null,
 )
 
 @Serializable
@@ -67,7 +68,6 @@ data class ArmorPiece(
     override val enchantments: List<EnchantData> = emptyList(),
     override val nbt: String? = null,
     override val unbreakable: Boolean? = true,
-    val teamId: String? = null,
 ): ConfigItem
 
 @Serializable

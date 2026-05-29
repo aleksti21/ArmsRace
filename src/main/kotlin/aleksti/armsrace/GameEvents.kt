@@ -113,7 +113,14 @@ object GameEvents {
     }
 
     @SubscribeEvent
-    fun onItemToss(event: ItemTossEvent) = runIfInGame(event.player) {player, lobby -> if (lobby.template.allowItemToss == false) event.isCanceled = true }
+    fun onItemToss(event: ItemTossEvent) = runIfInGame(event.player) {player, lobby -> 
+        if (lobby.template.allowItemToss == false) {
+            event.isCanceled = true
+            player.inventory.add(event.entity.item)
+            player.inventoryMenu.broadcastChanges()
+        }
+        
+    }
 
     @SubscribeEvent
     fun onPlayerLogout(event: PlayerEvent.PlayerLoggedOutEvent) {

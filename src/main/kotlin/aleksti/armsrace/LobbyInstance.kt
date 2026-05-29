@@ -186,7 +186,7 @@ class LobbyInstance(val id: Int, val template: LobbyTemplate) {
                 // У брони teamId лежит внутри элементов (шлема и тд).
                 // Чтобы не усложнять, берем первую подходящую,
                 // если хотя бы одна вещь из сета подходит игроку или всем.
-                it.helmet?.teamId == null || it.helmet.teamId == playerTeam
+                it.teamId == null || it.teamId == playerTeam
             }
 
             if (validArmor.isNotEmpty()) {
@@ -210,12 +210,13 @@ class LobbyInstance(val id: Int, val template: LobbyTemplate) {
                     }
                 }
             }
-        } else {
-            player.setItemSlot(EquipmentSlot.HEAD, ItemStack.EMPTY)
-            player.setItemSlot(EquipmentSlot.CHEST, ItemStack.EMPTY)
-            player.setItemSlot(EquipmentSlot.LEGS, ItemStack.EMPTY)
-            player.setItemSlot(EquipmentSlot.FEET, ItemStack.EMPTY)
-            player.setItemSlot(EquipmentSlot.OFFHAND, ItemStack.EMPTY)
         }
+//        } else {
+//            player.setItemSlot(EquipmentSlot.HEAD, ItemStack.EMPTY)
+//            player.setItemSlot(EquipmentSlot.CHEST, ItemStack.EMPTY)
+//            player.setItemSlot(EquipmentSlot.LEGS, ItemStack.EMPTY)
+//            player.setItemSlot(EquipmentSlot.FEET, ItemStack.EMPTY)
+//            player.setItemSlot(EquipmentSlot.OFFHAND, ItemStack.EMPTY)
+//        }
     }
 }

@@ -72,7 +72,7 @@ object ScoreboardManager {
                 )
             }
         } else if (lobby.state == GameState.PLAYING) {
-            val map = Component.literal(lobby.currentMap.name).withStyle(ChatFormatting.YELLOW)
+            val map = Component.literal(lobby.currentMap.name).withStyle(ChatFormatting.GOLD)
             sendLine(
                 Component.translatable("armsrace.scoreboard.arena")
                     .append(Component.literal(": "))
