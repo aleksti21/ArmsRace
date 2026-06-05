@@ -1,16 +1,14 @@
 package aleksti.armsrace.neoforge
 
-import net.neoforged.bus.api.IEventBus
-import net.neoforged.fml.common.Mod
-import net.neoforged.neoforge.common.NeoForge
 import aleksti.armsrace.ArmsRaceMod
+import net.neoforged.bus.api.IEventBus
+import net.neoforged.fml.ModContainer
+import net.neoforged.fml.common.Mod
 
-const val ID = "armsrace"
-@Mod(ID)
-class ArmsRaceForge(modEventBus: IEventBus) {
-
+@Mod(ArmsRaceMod.MOD_ID)
+class ArmsRaceForge(modEventBus: IEventBus, modContainer: ModContainer) {
     init {
-        println("[ArmsRace] Neoforge version")
+        println("🔨 [ArmsRace] Загрузка NeoForge версии...")
         ArmsRaceMod.init()
     }
 }
