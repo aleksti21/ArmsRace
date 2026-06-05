@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "id": "armsrace",
+  "version": "${version}",
+  "name": "armsrace",
+  "description": "A mod that allows you to recreate the arms race mode from CS2 in Minecraft",
+  "authors": [
+    "aleksti21"
+  ],
+  "contact": {
+    "homepage": "https://modrinth.com/mod/armsrace"
+  },
+  "license": "MPL-2.0",
+  "icon": "assets/armsrace/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "aleksti.armsrace.fabric.ArmsRaceFabric"
+    ],
+    "client": [
+      "aleksti.armsrace.fabric.client.ArmsRaceFabricClient"
+    ]
+  },
+  "mixins": [
+    "armsrace.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.19.3",
+    "minecraft": "~1.21.1",
+    "java": ">=21",
+    "architectury": ">=13.0.8",
+    "fabric-api": "*"
+  },
+  "suggests": {
+    "another-mod": "*"
+  }
+}
