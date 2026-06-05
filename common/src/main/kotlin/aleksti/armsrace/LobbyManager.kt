@@ -53,7 +53,7 @@ object LobbyManager {
         val template = ConfigManager.templates.find { it.templateId == template_id } ?: return text("no_lobby",
             TextType.ERROR)
         activeLobbies[id] = LobbyInstance(id, template)
-        return text("lobby_created", TextType.SUCCESS, args = arrayOf(template_id, id))
+        return text("lobby_created", TextType.SUCCESS,template_id, id)
     }
 
     fun findLobbyByPlayer(player: ServerPlayer): LobbyInstance? {

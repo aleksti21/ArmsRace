@@ -10,6 +10,7 @@ import net.minecraft.world.effect.MobEffectInstance
 import net.minecraft.world.effect.MobEffects
 import net.minecraft.world.entity.EquipmentSlot
 import net.minecraft.world.item.ItemStack
+import net.minecraft.world.level.GameType
 import kotlin.collections.iterator
 import kotlin.math.abs
 import kotlin.random.Random
@@ -68,6 +69,7 @@ class LobbyInstance(val id: Int, val template: LobbyTemplate) {
             val spawn = teamData.spawns[index]
             val world = player.serverLevel().server.getLevel(ResourceKey.create(Registries.DIMENSION, ResourceLocation.parse(spawn.world))) ?: player.serverLevel()
             player.health = player.maxHealth
+            player.setGameMode(GameType.byName(template.gamemode.lowercase()) ?: GameType.ADVENTURE)
             if (template.instantRespawn == false) given(LobbyManager.playerLevels[player.uuid] ?: 0, player)
             if (spawn.xRot != null) player.xRot = spawn.xRot.toFloat()
             if (spawn.yRot != null) player.yRot = spawn.yRot.toFloat()

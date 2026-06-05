@@ -134,5 +134,6 @@ data class LobbyTemplate(
     val warmup: Boolean = true,
     val lobbyCoord: SpawnPoint,
     val allowItemToss: Boolean = false,
-    val infinityfood: Boolean = false,
+    val infinityFood: Boolean = true,
+    val gamemode: String = "adventure",
 )

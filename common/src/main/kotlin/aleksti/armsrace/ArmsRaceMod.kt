@@ -10,5 +10,8 @@ object ArmsRaceMod {
             // Вызываем твой метод регистрации команды:
             ArmsRaceCommand.register(dispatcher)
         }
+
+        ConfigManager.loadConfigs()
+        GameEvents.register()
     }
 }

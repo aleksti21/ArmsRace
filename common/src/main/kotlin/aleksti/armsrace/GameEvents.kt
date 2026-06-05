@@ -26,7 +26,15 @@ object GameEvents {
                 val killer = damageSource.entity as? ServerPlayer
                 val killerLobby = killer?.let { LobbyManager.findLobbyByPlayer(it) }
                 val level = killer?.let { LobbyManager.playerLevels[it.uuid] }
-                if (killer == null || killerLobby != lobby || level == null) {
+                if (killer == null || killerLobby != lobby || level == null || killer == entity) {
+                    if (lobby.template.instantRespawn == true) {
+                        player.health = player.maxHealth
+                        lobby.teleportPlayerToSpawn(player)
+                        val victimLevel = LobbyManager.playerLevels[player.uuid] ?: 0
+                        lobby.given(victimLevel, player)
+
+                        return@runIfInGame EventResult.interruptFalse()
+                    }
                     return@runIfInGame EventResult.pass()
                 }
 
@@ -99,7 +107,7 @@ object GameEvents {
 
         EntityEvent.LIVING_HURT.register { entity, source, f ->
             runIfInGame(entity) {player, lobby ->
-                if (lobby.players[player] == lobby.players[source as? ServerPlayer ?: return@register EventResult.pass()]) EventResult.interruptFalse()
+                if (lobby.players[player] == lobby.players[source.entity as? ServerPlayer ?: return@register EventResult.pass()]) EventResult.interruptFalse()
                 EventResult.pass()
             }
         }
@@ -108,7 +116,7 @@ object GameEvents {
             for (lobby in LobbyManager.activeLobbies.values) {
                 lobby.tick()
 
-                if (lobby.state != GameState.LOBBY && lobby.template.infinityfood == true) {
+                if (lobby.state != GameState.LOBBY && lobby.template.infinityFood == true) {
                     for (p in lobby.players.keys) {
                         p.foodData.foodLevel = 20
                         p.foodData.setSaturation(5.0f)

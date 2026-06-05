@@ -16,9 +16,6 @@
   "entrypoints": {
     "main": [
       "aleksti.armsrace.fabric.ArmsRaceFabric"
-    ],
-    "client": [
-      "aleksti.armsrace.fabric.client.ArmsRaceFabricClient"
     ]
   },
   "mixins": [

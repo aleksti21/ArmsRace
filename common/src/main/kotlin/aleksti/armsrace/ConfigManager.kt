@@ -1,19 +1,21 @@
 package aleksti.armsrace
 
+import dev.architectury.platform.Platform
 import kotlinx.serialization.json.Json
-import net.minecraft.nbt.NbtUtils.prettyPrint
 import java.io.File
 
 object ConfigManager {
 
     // 1. Настраиваем "Переводчик" JSON
     private val jsonFormat = Json {
-        prettyPrint = true // Делает JSON красивым (с переносами строк и отступами), чтобы админу было удобно читать
-        ignoreUnknownKeys = true // Если админ напишет в конфиге отсебятину, мод не крашнется, а просто проигнорирует её
+        prettyPrint = true
+        ignoreUnknownKeys = true
+        isLenient = true
+        encodeDefaults = true
     }
 
     // 2. Указываем путь к файлу: папка_сервера/config/armsrace_arenas.json
-    private val configFile: File = FMLPaths.CONFIGDIR.get().resolve("armsrace_arenas.json").toFile()
+    private val configFile: File = Platform.getConfigFolder().resolve("armsrace_arenas.json").toFile()
 
     // Здесь мы будем хранить загруженные арены в оперативной памяти
     var templates = listOf<LobbyTemplate>()

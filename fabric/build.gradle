@@ -53,3 +53,15 @@ shadowJar {
 remapJar {
     input.set shadowJar.archiveFile
 }
+
+loom {
+    runs {
+        // Создаем новую конфигурацию
+        client2 {
+            client() // Говорим, что это клиент
+            name = "Fabric Client 2" // Так он будет называться в IDEA
+            runDir = "run2" // ВАЖНО! Даем ему отдельную папку
+            programArgs "--username", "Dev2" // Меняем ник
+        }
+    }
+}
