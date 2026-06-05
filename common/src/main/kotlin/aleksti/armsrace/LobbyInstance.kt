@@ -86,7 +86,7 @@ class LobbyInstance(val id: Int, val template: LobbyTemplate) {
                 warmupTicks = template.warmupTime * 20
             } else if (players.size < template.minPlayers && state != GameState.LOBBY) {
                 for (p in players.keys) {
-                    p.sendSystemMessage(Component.literal("§cМатч отменен: недостаточно игроков!"))
+                    p.sendSystemMessage(text("match_canceled", TextType.ERROR))
                 }
                 LobbyManager.deleteLobby(id)
             }
@@ -97,18 +97,14 @@ class LobbyInstance(val id: Int, val template: LobbyTemplate) {
     }
 
     fun tick() {
-        // Разрешаем тикать и в WAITING, и в FINISHED
         if ((state != GameState.WAITING && state != GameState.FINISHED) || warmupTicks < 0) return
-
-        warmupTicks-- // Отнимаем 1 тик
-
+        warmupTicks--
         if (warmupTicks % 20 == 0) {
             for (player in players.keys) {
                 ScoreboardManager.updateScoreboard(player, this)
             }
         }
 
-        // Если время вышло - стартуем!
         if (warmupTicks == 0) {
             if (state == GameState.FINISHED) {
                 LobbyManager.deleteLobby(id)
@@ -129,18 +125,14 @@ class LobbyInstance(val id: Int, val template: LobbyTemplate) {
         val weaponPool = template.weapons.getOrNull(level)
         if (weaponPool != null) {
             val playerTeam = players[player]
-            // Оставляем только те пушки, которые для всех (null) или для команды игрока
             val validWeapons = weaponPool.options.filter { it.teamId == null || it.teamId == playerTeam }
 
             if (validWeapons.isNotEmpty()) {
                 val seed = matchWeaponSeeds.getOrElse(level) { 0 }
-                // Математика: берем остаток от деления, чтобы индекс не вышел за пределы
                 val weaponIndex = abs(seed) % validWeapons.size
                 val weaponToGive = validWeapons[weaponIndex]
 
                 player.setItemSlot(EquipmentSlot.MAINHAND, buildAndEnchantItem(weaponToGive, player))
-
-                // Выдаем доп. предметы ТОЛЬКО если выдалась пушка (внутри блока!)
                 for (i in weaponToGive.additionalItems) {
                     player.inventory.setItem(i.slot, buildAndEnchantItem(i, player))
                 }
@@ -152,9 +144,6 @@ class LobbyInstance(val id: Int, val template: LobbyTemplate) {
         if (armorPool != null) {
             val playerTeam = players[player]
             val validArmor = armorPool.options.filter {
-                // У брони teamId лежит внутри элементов (шлема и тд).
-                // Чтобы не усложнять, берем первую подходящую,
-                // если хотя бы одна вещь из сета подходит игроку или всем.
                 it.teamId == null || it.teamId == playerTeam
             }
 

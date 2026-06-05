@@ -77,26 +77,28 @@ object LobbyManager {
         if (findLobbyByPlayer(player) != null) return text("already_in_lobby", TextType.ERROR)
 
         if (id == null) {
+            // Подключение в ЛЮБОЕ свободное лобби
             for (lobby in activeLobbies.values) {
-//                val totalSpawns = lobby.currentMap.teams.sumOf { it.spawns.size }
-                // Пускаем либо в LOBBY, либо в WAITING (если есть места)
-                if (lobby.state == GameState.LOBBY || lobby.state == GameState.WAITING) {
+                // Проверяем, что игра не началась и есть места
+                if ((lobby.state == GameState.LOBBY || lobby.state == GameState.WAITING) && lobby.players.size < lobby.template.maxPlayers) {
                     processPlayerJoin(player, lobby)
                     return text("add_player", TextType.SUCCESS)
                 }
             }
-            return text("add_player", TextType.ERROR)
+            return text("no_lobby", TextType.ERROR)
         } else {
+            // Подключение по ID
             val lobby = activeLobbies[id] ?: return text("no_lobby", TextType.ERROR)
 
-            // Тут тоже проверяем, что игра еще не началась и есть места
-            val totalSpawns = lobby.currentMap.teams.sumOf { it.spawns.size }
-            if (lobby.state == GameState.PLAYING || lobby.players.size >= totalSpawns) {
+            // Та же самая проверка на стадию игры и количество мест
+            if ((lobby.state == GameState.LOBBY || lobby.state == GameState.WAITING) && lobby.players.size < lobby.template.maxPlayers) {
                 processPlayerJoin(player, lobby)
                 return text("add_player", TextType.SUCCESS)
+            } else {
+                // Если лобби заполнено или игра уже идет (PLAYING/FINISHED)
+                return text("no_lobby", TextType.ERROR) // Можешь потом заменить на текст "Лобби заполнено"
             }
         }
-        return text("no_lobby", TextType.ERROR)
     }
 
     fun removePlayer(player: ServerPlayer): MutableComponent {
@@ -121,8 +123,8 @@ object LobbyManager {
     }
 
     fun startCommand(lobbyID: Int?): MutableComponent {
-        val lobby = activeLobbies[lobbyID] ?: return error("Lobby not found")
-        if (lobby.state == GameState.PLAYING) return error("Game is already running")
+        val lobby = activeLobbies[lobbyID] ?: return text("no_lobby", TextType.ERROR)
+        if (lobby.state == GameState.PLAYING) return text("already_run", TextType.ERROR)
         if (lobby.state == GameState.WAITING) {
             for (player in lobby.players.keys) playerLevels[player.uuid] = 0
             return lobby.start(GameState.PLAYING)

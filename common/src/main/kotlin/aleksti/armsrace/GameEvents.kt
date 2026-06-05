@@ -88,27 +88,28 @@ object GameEvents {
         PlayerEvent.PLAYER_RESPAWN.register { player, bool, reason ->
             runIfInGame(player) {player, lobby ->
                 lobby.teleportPlayerToSpawn(player)
-                EventResult.pass()
+                return@runIfInGame EventResult.pass()
             }
         }
 
         InteractionEvent.LEFT_CLICK_BLOCK.register { player, hand, pos, direction ->
             runIfInGame(player, condition = {it.allowBlockBreaking == false}) {player, lobby ->
-                EventResult.interruptFalse()
+                return@runIfInGame EventResult.interruptFalse()
             }
         }
 
         InteractionEvent.RIGHT_CLICK_BLOCK.register { player, hand, pos, direction ->
             runIfInGame(player, condition = {it.allowBlockBreaking == false}) {player, lobby ->
                 player.inventoryMenu.sendAllDataToRemote()
-                EventResult.interruptFalse()
+                return@runIfInGame EventResult.interruptFalse()
             }
         }
 
         EntityEvent.LIVING_HURT.register { entity, source, f ->
             runIfInGame(entity) {player, lobby ->
-                if (lobby.players[player] == lobby.players[source.entity as? ServerPlayer ?: return@register EventResult.pass()]) EventResult.interruptFalse()
-                EventResult.pass()
+                val attacker = source.entity as? ServerPlayer ?: return@runIfInGame EventResult.pass()
+                if (lobby.players[player] == lobby.players[attacker]) return@runIfInGame EventResult.interruptFalse()
+                return@runIfInGame EventResult.pass()
             }
         }
 
@@ -118,8 +119,13 @@ object GameEvents {
 
                 if (lobby.state != GameState.LOBBY && lobby.template.infinityFood == true) {
                     for (p in lobby.players.keys) {
-                        p.foodData.foodLevel = 20
-                        p.foodData.setSaturation(5.0f)
+                        if (lobby.template.regeneration == true) {
+                            p.foodData.foodLevel = 20
+                            p.foodData.setSaturation(5.0f)
+                        } else {
+                            p.foodData.foodLevel = 17
+                            p.foodData.setSaturation(0.0f)
+                        }
                     }
                 }
             }
@@ -128,7 +134,7 @@ object GameEvents {
         PlayerEvent.PLAYER_QUIT.register { player ->
             runIfInGame(player) {p, lobby ->
                 LobbyManager.removePlayer(p)
-                EventResult.pass()
+                return@runIfInGame EventResult.pass()
             }
         }
 
@@ -142,7 +148,7 @@ object GameEvents {
                 // Возвращаем предмет и отменяем ивент
                 p.inventory.add(itemEntity.item)
                 p.inventoryMenu.broadcastChanges()
-                EventResult.interruptFalse()
+                return@runIfInGame EventResult.interruptFalse()
             }
         }
     }

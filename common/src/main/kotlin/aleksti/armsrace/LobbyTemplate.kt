@@ -136,4 +136,5 @@ data class LobbyTemplate(
     val allowItemToss: Boolean = false,
     val infinityFood: Boolean = true,
     val gamemode: String = "adventure",
+    val regeneration: Boolean = false,
 )
