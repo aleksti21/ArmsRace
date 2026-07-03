@@ -1,6 +1,6 @@
-package aleksti.armsrace.neoforge
+package aleksti21.armsrace.neoforge
 
-import aleksti.armsrace.ArmsRaceMod
+import aleksti21.armsrace.ArmsRaceMod
 import net.neoforged.bus.api.IEventBus
 import net.neoforged.fml.ModContainer
 import net.neoforged.fml.common.Mod
@@ -8,7 +8,6 @@ import net.neoforged.fml.common.Mod
 @Mod(ArmsRaceMod.MOD_ID)
 class ArmsRaceForge(modEventBus: IEventBus, modContainer: ModContainer) {
     init {
-        println("🔨 [ArmsRace] Загрузка NeoForge версии...")
         ArmsRaceMod.init()
     }
 }

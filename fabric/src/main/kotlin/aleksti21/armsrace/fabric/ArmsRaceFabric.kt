@@ -1,11 +1,10 @@
-package aleksti.armsrace.fabric
+package aleksti21.armsrace.fabric
 
 import net.fabricmc.api.ModInitializer
-import aleksti.armsrace.ArmsRaceMod
+import aleksti21.armsrace.ArmsRaceMod
 
 class ArmsRaceFabric: ModInitializer {
     override fun onInitialize() {
-        println("[ArmsRace] Fabric version")
         ArmsRaceMod.init()
     }
 }

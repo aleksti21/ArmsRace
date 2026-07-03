@@ -1,7 +1,6 @@
-﻿package aleksti.armsrace
+﻿package aleksti21.armsrace
 
 import net.minecraft.core.registries.Registries
-import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.MutableComponent
 import net.minecraft.resources.ResourceKey
 import net.minecraft.resources.ResourceLocation

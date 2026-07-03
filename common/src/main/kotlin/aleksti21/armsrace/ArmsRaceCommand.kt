@@ -1,4 +1,4 @@
-package aleksti.armsrace
+package aleksti21.armsrace
 
 import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.arguments.IntegerArgumentType

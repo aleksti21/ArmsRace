@@ -9,6 +9,7 @@
   "error.armsrace.alredy_run": "Игра уже запущена.",
   "success.armsrace.game_start": "Игра началась!",
   "error.armsrace.no_lobby": "Лобби с таким ID не найдено.",
+  "error.armsrace.match_canceled": "Матч отменён, недостаточно игроков",
   "success.armsrace.lobby_created": "Лобби с шаблоном '%s' и ID '%s' создано.",
   "success.armsrace.lobby_deleted": "Лобби удалено.",
   "error.armsrace.already_in_lobby": "Вы уже находитесь в лобби.",

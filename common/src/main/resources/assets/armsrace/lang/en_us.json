@@ -9,6 +9,7 @@
   "error.armsrace.alredy_run": "The game is already running.",
   "success.armsrace.game_start": "The game has started!",
   "error.armsrace.no_lobby": "Lobby with this ID not found.",
+  "error.armsrace.match_canceled": "Match cancelled, not enough players",
   "success.armsrace.lobby_created": "Lobby with template '%s' and ID '%s' created.",
   "success.armsrace.lobby_deleted": "Lobby deleted.",
   "error.armsrace.already_in_lobby": "You are already in a lobby.",

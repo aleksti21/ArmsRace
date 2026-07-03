@@ -27,7 +27,6 @@ configurations {
 
 dependencies {
     modImplementation "net.fabricmc:fabric-loader:$rootProject.fabric_loader_version"
-
     modImplementation "net.fabricmc.fabric-api:fabric-api:$rootProject.fabric_api_version"
 
     modImplementation "dev.architectury:architectury-fabric:$rootProject.architectury_api_version"
@@ -35,6 +34,7 @@ dependencies {
     common(project(path: ':common', configuration: 'namedElements')) { transitive false }
     shadowBundle project(path: ':common', configuration: 'transformProductionFabric')
     modImplementation "net.fabricmc:fabric-language-kotlin:1.13.11+kotlin.2.3.21"
+    modRuntimeOnly "maven.modrinth:nbttodata:0.1.0-alpha-${minecraft_version}"
 }
 
 processResources {

@@ -1,4 +1,4 @@
-package aleksti.armsrace
+package aleksti21.armsrace
 
 import dev.architectury.event.EventResult
 import dev.architectury.event.events.common.PlayerEvent
