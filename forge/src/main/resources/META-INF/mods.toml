@@ -1,0 +1,49 @@
+modLoader = "kotlinforforge"
+loaderVersion = "[4,)"
+#issueTrackerURL = ""
+license = "LicenseRef-ZLA"
+
+[[mods]]
+modId = "armsrace"
+version = "${version}"
+displayName = "ArmsRace"
+authors = "aleksti21"
+description = '''
+
+'''
+#logoFile = ""
+
+[[dependencies.armsrace]]
+modId = "forge"
+mandatory = true
+versionRange = "[47,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.armsrace]]
+modId = "minecraft"
+mandatory = true
+versionRange = "[1.20.1,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.armsrace]]
+modId = "architectury"
+mandatory = true
+versionRange = "[9.2.14,)"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies.armsrace]]
+modId = "kotlinforforge"
+mandatory = true
+versionRange = "[4,)"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies.armsrace]]
+modId="nbttodata"
+mandatory=true
+versionRange="[0.1.0-alpha,)"
+ordering="NONE"
+side="BOTH"
