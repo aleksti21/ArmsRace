@@ -3,6 +3,7 @@
 
 # Gradle cache folder
 .gradle
+gradle
 
 # Gradle build folder
 build
@@ -21,3 +22,5 @@ hs_err_pid*
 run
 run2
 common/libs
+.kotlin
+.architectury-transformer

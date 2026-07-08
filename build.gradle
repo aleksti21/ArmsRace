@@ -2,7 +2,7 @@ plugins {
     id 'dev.architectury.loom' version '1.14-SNAPSHOT' apply false
     id 'architectury-plugin' version '3.4-SNAPSHOT'
     id 'com.github.johnrengelman.shadow' version '8.1.1' apply false
-    id 'org.jetbrains.kotlin.jvm' version "2.3.21"
+    id 'org.jetbrains.kotlin.jvm' version "2.4.0"
     id 'org.jetbrains.kotlin.plugin.serialization' version '2.0.0'
     id "io.github.pacifistmc.forgix" version "2.0.0-SNAPSHOT.5.1"
 }
@@ -51,12 +51,12 @@ subprojects {
         // If you remove this line, sources will not be generated.
         withSourcesJar()
 
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     tasks.withType(JavaCompile).configureEach {
-        it.options.release = 21
+        it.options.release = 17
     }
 
     // Configure Maven publishing.
@@ -76,6 +76,12 @@ subprojects {
             // retrieving dependencies.
         }
     }
+
+    tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).configureEach {
+        kotlinOptions {
+            jvmTarget = "17"
+        }
+    }
 }
 
 forgix {
@@ -83,3 +89,25 @@ forgix {
     fabric()
     forge()
 }
+
+//tasks.register('mergeJarsSimple', Jar) {
+//    archiveBaseName = "${rootProject.archives_name}"
+//    archiveVersion = project.version
+//    destinationDirectory = file("${rootProject.buildDir}/libs")
+//
+//    def fabricJar = project(":fabric").tasks.remapJar.archiveFile
+//    def forgeJar = project(":forge").tasks.remapJar.archiveFile
+//
+//    dependsOn project(":fabric").tasks.remapJar
+//    dependsOn project(":forge").tasks.remapJar
+//
+//    // Распаковываем Fabric-джарник (он пойдет за основу)
+//    from(zipTree(fabricJar)) {
+//        duplicatesStrategy = DuplicatesStrategy.INCLUDE
+//    }
+//
+//    // Распаковываем NeoForge-джарник, но исключаем дубликаты общих классов!
+//    from(zipTree(forgeJar)) {
+//        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+//    }
+//}
