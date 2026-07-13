@@ -28,7 +28,7 @@ data class SpawnPoint(
 )
 @Serializable
 data class TeamTemplate(
-    val teamId: String, // Например: "red", "blue" или "terrorists"
+    val teamId: String,
     val colorCode: String = "§f",
     val spawns: List<SpawnPoint>
 )

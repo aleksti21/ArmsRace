@@ -7,7 +7,7 @@ pluginManagement {
     }
 }
 
-rootProject.name = 'armsrace'
+rootProject.name = 'ArmsRace-1.20.1'
 
 include 'common'
 include 'fabric'

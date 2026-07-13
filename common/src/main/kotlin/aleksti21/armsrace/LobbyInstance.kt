@@ -54,15 +54,10 @@ class LobbyInstance(val id: Int, val template: LobbyTemplate) {
         return text("game_start", TextType.SUCCESS)
     }
 
-    // Функция сама узнает команду игрока и телепортирует его куда надо
     fun teleportPlayerToSpawn(player: ServerPlayer) {
-        // 1. Узнаем, за какую команду играет этот игрок (читаем из нашей Мапы)
         val teamId = players[player] ?: return
-
-        // 2. Ищем настройки этой команды в шаблоне
         val teamData = currentMap.teams.find { it.teamId == teamId } ?: return
 
-        // 3. Берем случайный спавн и телепортируем
         if (teamData.spawns.isNotEmpty()) {
             val index = players.filterValues { it == teamId }.keys.toList().indexOf(player) % teamData.spawns.size
             val spawn = teamData.spawns[index]
@@ -138,7 +133,6 @@ class LobbyInstance(val id: Int, val template: LobbyTemplate) {
             }
         }
 
-        // --- ВЫДАЧА БРОНИ ---
         val armorPool = template.armor.getOrNull(level)
         if (armorPool != null) {
             val playerTeam = players[player]

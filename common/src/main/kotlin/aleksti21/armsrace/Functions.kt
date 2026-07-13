@@ -38,15 +38,12 @@ fun getItemFromString(id: String?): Item {
 private fun createAttachmentTag(attachmentId: String): CompoundTag {
     val tag = CompoundTag()
     tag.putString("id", "tacz:attachment")
-    tag.putInt("count", 1)
+    tag.putByte("Count", 1)
 
-    val customData = CompoundTag()
-    customData.putString("AttachmentId", attachmentId)
+    val innerTag = CompoundTag()
+    innerTag.putString("AttachmentId", attachmentId)
 
-    val components = CompoundTag()
-    components.put("minecraft:custom_data", customData)
-
-    tag.put("components", components)
+    tag.put("tag", innerTag)
     return tag
 }
 
@@ -54,8 +51,6 @@ fun buildAndEnchantItem(config: ConfigItem, player: ServerPlayer): ItemStack {
     val mcItem = getItemFromString(config.id)
     val count = if (config is AdditionalItem) config.count else 1
     val stack = ItemStack(mcItem, count)
-
-    // На 1.20.1 editData вызывается без реестров!
     stack.editData {
         if (config.unbreakable == true) {
             unbreakable = true
@@ -102,7 +97,6 @@ fun buildAndEnchantItem(config: ConfigItem, player: ServerPlayer): ItemStack {
         }
     }
 
-    // Для applySNBT мы передаем реестры (они на 1.20 просто проигнорируются)
     if (config.nbt != null) {
         stack.applySNBT(config.nbt!!, player.server.registryAccess())
     }
@@ -130,3 +124,11 @@ fun nametags(player: ServerPlayer, type: NametagsFunType) {
 }
 
 fun text(key: String, type: TextType = TextType.INFO, vararg args: Any): MutableComponent = if (type != TextType.GAME) Component.literal("[ArmsRace] ").append(Component.translatable("${type.prefix}.armsrace.$key", *args).withStyle(type.color)) else Component.translatable("${type.prefix}.armsrace.$key", *args).withStyle(type.color)
+
+@JvmName("shouldDisableRegen")
+fun shouldDisableRegen(player: ServerPlayer): Boolean {
+    val lobby = LobbyManager.activeLobbies.values.find { l ->
+        l.players.keys.any { it.uuid == player.uuid }
+    } ?: return false
+    return lobby.state != GameState.LOBBY && lobby.template.regeneration == false
+}

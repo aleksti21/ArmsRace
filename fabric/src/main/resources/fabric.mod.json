@@ -10,6 +10,9 @@
   "contact": {
     "homepage": "https://modrinth.com/mod/armsrace"
   },
+  "mixins": [
+    "armsrace.mixins.json"
+  ],
   "license": "LicenseRef-ZLA",
   "icon": "assets/armsrace/icon.png",
   "environment": "*",

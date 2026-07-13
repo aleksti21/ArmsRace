@@ -39,12 +39,11 @@ object ScoreboardManager {
 
         if (oldLines != null) {
             for (oldText in oldLines) {
-                // Шлем пакет REMOVE для каждой старой строки
                 player.connection.send(ClientboundSetScorePacket(
                     ServerScoreboard.Method.REMOVE,
                     objectiveName,
                     oldText,
-                    0 // Счёт при удалении игнорируется
+                    0
                 ))
             }
             oldLines.clear()
@@ -53,8 +52,6 @@ object ScoreboardManager {
         }
         fun sendLine(text: Component, score: Int) {
             val textString = text.string
-
-            // Запоминаем, что мы вывели эту строку игроку
             playerActiveLines[playerUuid]?.add(textString)
 
             val packet = ClientboundSetScorePacket(
