@@ -15,7 +15,9 @@ import net.minecraft.world.entity.LivingEntity
 import dev.architectury.event.events.common.EntityEvent
 import dev.architectury.event.events.common.InteractionEvent
 import dev.architectury.event.events.common.TickEvent
+import net.minecraft.core.particles.ParticleTypes
 import net.minecraft.world.damagesource.DamageSource
+import net.minecraft.world.effect.MobEffects
 
 object GameEvents {
 
@@ -113,21 +115,31 @@ object GameEvents {
             }
         }
 
-        TickEvent.SERVER_POST.register { player ->
+        TickEvent.SERVER_POST.register { server ->
             for (lobby in LobbyManager.activeLobbies.values) {
                 lobby.tick()
 
                 if (lobby.state != GameState.LOBBY && lobby.template.infinityFood == true) {
                     for (p in lobby.players.keys) {
-                        if (lobby.template.regeneration == true) {
-                            p.foodData.foodLevel = 20
-                            p.foodData.setSaturation(5.0f)
-                        } else {
-                            p.foodData.foodLevel = 17
-                            p.foodData.setSaturation(0.0f)
-                        }
+                        p.foodData.foodLevel = 20
+                        p.foodData.setSaturation(5.0f)
                     }
                 }
+            }
+        }
+
+        TickEvent.PLAYER_POST.register { player ->
+            val p = player as? ServerPlayer ?: return@register
+            if (p.hasEffect(MobEffects.DAMAGE_RESISTANCE)) {
+                val world = p.serverLevel()
+
+                world.sendParticles(
+                    ParticleTypes.END_ROD, // Тип частиц (парящие белые звёздочки)
+                    p.x, p.y + 1.0, p.z,   // Спавним на высоте груди (1 метр над ногами)
+                    1,                     // Всего 3 частицы за тик (чтобы вообще не нагружать сервер)
+                    0.3, 0.5, 0.3,         // Небольшой разброс по размерам тела игрока
+                    0.02                   // Минимальная скорость парения
+                )
             }
         }
 
@@ -142,10 +154,8 @@ object GameEvents {
         PlayerEvent.DROP_ITEM.register { player, itemEntity ->
             runIfInGame(
                 entity = player,
-                // Код ниже (action) сработает ТОЛЬКО если выбрасывать предметы запрещено
                 condition = { it.allowItemToss == false }
             ) { p, lobby ->
-                // Возвращаем предмет и отменяем ивент
                 p.inventory.add(itemEntity.item)
                 p.inventoryMenu.broadcastChanges()
                 return@runIfInGame EventResult.interruptFalse()
@@ -153,26 +163,17 @@ object GameEvents {
         }
     }
 
-    // Вспомогательная функция (где-то в твоих утилитах или Functions.kt)
-    inline fun runIfInGame(
+    private inline fun runIfInGame(
         entity: Entity?,
-        // Добавили проверку конфига. По умолчанию она всегда выдает true
         condition: (LobbyTemplate) -> Boolean? = { true },
         action: (ServerPlayer, LobbyInstance) -> EventResult
     ): EventResult {
-        // Проверяем, что это ServerPlayer
         val player = entity as? ServerPlayer ?: return EventResult.pass()
-
-        // Ищем лобби
         val lobby = LobbyManager.findLobbyByPlayer(player) ?: return EventResult.pass()
 
-        // Если игра идет (не в режиме ожидания) И наше кастомное условие выполнилось
         if (lobby.state != GameState.LOBBY && condition(lobby.template) == true) {
-            // Выполняем то, что передали в action
             return action(player, lobby)
         }
-
-        // Если игрок не в игре или условие не совпало — просто идем дальше
         return EventResult.pass()
     }
 }

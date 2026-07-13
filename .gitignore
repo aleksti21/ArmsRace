@@ -21,3 +21,4 @@ hs_err_pid*
 run
 run2
 common/libs
+.kotlin

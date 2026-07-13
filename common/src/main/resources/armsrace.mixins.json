@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "package": "aleksti21.armsrace.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "FoodDataMixin"
+  ],
+  "client": [],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

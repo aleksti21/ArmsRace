@@ -1,6 +1,6 @@
 modLoader = "kotlinforforge"
 loaderVersion = "[5,)"
-license = "LicenseRef-ATMML-1.3"
+license = "LicenseRef-ZLA"
 
 [[mods]]
 modId = "armsrace"
@@ -42,6 +42,6 @@ side = "BOTH"
 [[dependencies.armsrace]]
 modId="nbttodata"
 type="required"
-versionRange="[0.1.0-alpha,)"
+versionRange="[0.1.1-alpha,)"
 ordering="NONE"
 side="BOTH"

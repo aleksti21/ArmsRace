@@ -38,12 +38,15 @@ fun getItemFromString(id: String?): Item {
 private fun createAttachmentTag(attachmentId: String): CompoundTag {
     val tag = CompoundTag()
     tag.putString("id", "tacz:attachment")
-    tag.putByte("Count", 1) // В 1.20.1 "Count" пишется с большой буквы и является байтом!
+    tag.putInt("count", 1)
 
-    val innerTag = CompoundTag()
-    innerTag.putString("AttachmentId", attachmentId)
+    val customData = CompoundTag()
+    customData.putString("AttachmentId", attachmentId)
 
-    tag.put("tag", innerTag) // В 1.20.1 вложения хранятся в старом теге "tag"
+    val components = CompoundTag()
+    components.put("minecraft:custom_data", customData)
+
+    tag.put("components", components)
     return tag
 }
 
@@ -53,22 +56,18 @@ fun buildAndEnchantItem(config: ConfigItem, player: ServerPlayer): ItemStack {
     val stack = ItemStack(mcItem, count)
     val registries = player.server.registryAccess()
 
-    // 1. Используем наш editData DSL для сборки базовых свойств
     stack.editData(registries) {
         if (config.unbreakable == true) {
             unbreakable = true
         }
-
-        // Зачарования применяются одной строчкой
         if (config.enchantments.isNotEmpty()) {
             enchantments {
                 config.enchantments.forEach { data ->
-                    data.id(data.level) // Вызываем перегрузку оператора "id"(level)
+                    data.id(data.level)
                 }
             }
         }
 
-        // Кастомные NBT оружия и патронов пишем в customData
         if (config is Weapon && config.taczData != null) {
             customData {
                 val tData = config.taczData
@@ -102,7 +101,6 @@ fun buildAndEnchantItem(config: ConfigItem, player: ServerPlayer): ItemStack {
         }
     }
 
-    // 2. А теперь магия! Любой кастомный NBT-тег из конфига транслируется в компоненты!
     if (config.nbt != null) {
         stack.applySNBT(config.nbt!!, registries)
     }
@@ -130,3 +128,11 @@ fun nametags(player: ServerPlayer, type: NametagsFunType) {
 }
 
 fun text(key: String, type: TextType = TextType.INFO, vararg args: Any): MutableComponent = if (type != TextType.GAME) Component.literal("[ArmsRace] ").append(Component.translatable("${type.prefix}.armsrace.$key", *args).withStyle(type.color)) else Component.translatable("${type.prefix}.armsrace.$key", *args).withStyle(type.color)
+
+@JvmName("shouldDisableRegen")
+fun shouldDisableRegen(player: ServerPlayer): Boolean {
+    val lobby = LobbyManager.activeLobbies.values.find { l ->
+        l.players.keys.any { it.uuid == player.uuid }
+    } ?: return false
+    return lobby.state != GameState.LOBBY && lobby.template.regeneration == false
+}

@@ -45,7 +45,7 @@ dependencies {
     common(project(path: ':common', configuration: 'namedElements')) { transitive false }
     shadowBundle project(path: ':common', configuration: 'transformProductionNeoForge')
     implementation 'thedarkcolour:kotlinforforge-neoforge:5.11.0'
-    modRuntimeOnly "maven.modrinth:nbttodata:0.1.0-alpha-${minecraft_version}"
+    modImplementation "maven.modrinth:nbttodata:0.1.1-alpha-${minecraft_version}"
 }
 
 processResources {
@@ -59,6 +59,10 @@ processResources {
 shadowJar {
     configurations = [project.configurations.shadowBundle]
     archiveClassifier = 'dev-shadow'
+    exclude "kotlin/**"
+    exclude "org/intellij/**"
+    exclude "org/jetbrains/**"
+    exclude "jetbrains/**"
 }
 
 remapJar {

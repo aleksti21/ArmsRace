@@ -17,34 +17,23 @@ object LobbyManager {
     val inventories = mutableMapOf<UUID, List<ItemStack>>()
 
     private fun processPlayerJoin(player: ServerPlayer, lobby: LobbyInstance) {
-        // 1. Базовые вещи: ставим пустую команду, обнуляем уровень, даем скорборд
         lobby.players[player] = ""
         playerLevels[player.uuid] = 0
         ScoreboardManager.initScoreboard(player, Component.literal(lobby.template.displayName))
 
-        // 2. Если игра УЖЕ на разминке (WAITING)
         if (lobby.state == GameState.WAITING) {
-            // Находим команду, в которой меньше всего игроков (балансировщик)
             val teamCounts = lobby.currentMap.teams.associate { it.teamId to 0 }.toMutableMap()
             lobby.players.values.filter { it.isNotEmpty() }.forEach { teamId ->
                 teamCounts[teamId] = teamCounts.getOrDefault(teamId, 0) + 1
             }
             val bestTeamId = teamCounts.minByOrNull { it.value }?.key ?: lobby.currentMap.teams.first().teamId
-
-            // Выдаем игроку эту команду
             lobby.players[player] = bestTeamId
-
-            // Делаем всё то же самое, что в start(WAITING)
             inventories[player.uuid] = player.inventory.items.map { it.copy() }
-            // Вызови свою функцию прятанья ников (у тебя вроде nametags())
             nametags(player, NametagsFunType.HIDE)
             lobby.teleportPlayerToSpawn(player)
         } else {
-            // Если игра еще в LOBBY (ожидание первого/второго игрока), проверяем вармап
             lobby.checkWarmup()
         }
-
-        // 3. Обновляем скорборд (чтобы появилась статистика)
         ScoreboardManager.updateScoreboard(player, lobby)
     }
 
@@ -77,9 +66,7 @@ object LobbyManager {
         if (findLobbyByPlayer(player) != null) return text("already_in_lobby", TextType.ERROR)
 
         if (id == null) {
-            // Подключение в ЛЮБОЕ свободное лобби
             for (lobby in activeLobbies.values) {
-                // Проверяем, что игра не началась и есть места
                 if ((lobby.state == GameState.LOBBY || lobby.state == GameState.WAITING) && lobby.players.size < lobby.template.maxPlayers) {
                     processPlayerJoin(player, lobby)
                     return text("add_player", TextType.SUCCESS)
@@ -87,16 +74,12 @@ object LobbyManager {
             }
             return text("no_lobby", TextType.ERROR)
         } else {
-            // Подключение по ID
             val lobby = activeLobbies[id] ?: return text("no_lobby", TextType.ERROR)
-
-            // Та же самая проверка на стадию игры и количество мест
             if ((lobby.state == GameState.LOBBY || lobby.state == GameState.WAITING) && lobby.players.size < lobby.template.maxPlayers) {
                 processPlayerJoin(player, lobby)
                 return text("add_player", TextType.SUCCESS)
             } else {
-                // Если лобби заполнено или игра уже идет (PLAYING/FINISHED)
-                return text("no_lobby", TextType.ERROR) // Можешь потом заменить на текст "Лобби заполнено"
+                return text("no_lobby", TextType.ERROR)
             }
         }
     }
